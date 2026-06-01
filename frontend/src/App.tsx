@@ -6,7 +6,7 @@ function App() {
       <div className="absolute inset-0">
         <Galaxy density={1.5} glowIntensity={0.5} hueShift={500} saturation={0.8} />
       </div>
-      <section id="center" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center px-6 text-center font-['Space_Grotesk',sans-serif] text-6xl font-bold tracking-wide text-zinc-300 md:text-8xl">
+      <section id="center" className="pointer-events-none relative z-10 flex min-h-screen items-center justify-center px-6 text-center font-['Atures','Space_Grotesk',sans-serif] text-6xl font-bold tracking-wide text-zinc-300 md:text-8xl">
         Hey, I'm Chloe Houvardas
       </section>
     </main>

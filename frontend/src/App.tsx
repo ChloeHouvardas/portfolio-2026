@@ -1,4 +1,5 @@
 import { useState } from 'react'
+import { ChevronLeft, ChevronRight } from 'lucide-react'
 
 import HoloPhotoCard from './components/HoloPhotoCard'
 import birdImage from './assets/birds/image-2.png'
@@ -102,9 +103,18 @@ function SectionHeading({ title }: { title: string }) {
   )
 }
 
+function getCarouselPosition(index: number, activeIndex: number) {
+  const rawOffset = (index - activeIndex + holoCards.length) % holoCards.length
+
+  if (rawOffset === holoCards.length - 1) {
+    return -1
+  }
+
+  return rawOffset
+}
+
 function App() {
   const [activeCardIndex, setActiveCardIndex] = useState(0)
-  const activeHoloCard = holoCards[activeCardIndex]
 
   const showPreviousCard = () => {
     setActiveCardIndex((currentIndex) => (currentIndex - 1 + holoCards.length) % holoCards.length)
@@ -150,36 +160,54 @@ function App() {
               </a>
             </div>
           </div>
-          <div className="flex flex-col items-center md:items-end">
-            <HoloPhotoCard
-              key={activeHoloCard.title}
-              image={activeHoloCard.image}
-              title={activeHoloCard.title}
-              variant={activeHoloCard.variant}
-            />
-            <div className="mt-5 w-full max-w-[340px] rounded-lg border border-neutral-900/10 bg-white p-4 shadow-sm">
-              <p className="text-lg font-bold text-neutral-950">{activeHoloCard.title}</p>
-              <p className="mt-1 text-sm text-neutral-500">{activeHoloCard.subtitle}</p>
-              <div className="mt-4 flex items-center justify-between gap-3">
-                <button
-                  type="button"
-                  onClick={showPreviousCard}
-                  className="rounded-md border border-neutral-300 px-4 py-2 font-bold text-neutral-900 transition hover:border-neutral-950"
-                >
-                  Previous
-                </button>
-                <p className="text-sm text-neutral-500">
-                  {activeCardIndex + 1} / {holoCards.length}
-                </p>
-                <button
-                  type="button"
-                  onClick={showNextCard}
-                  className="rounded-md bg-neutral-950 px-4 py-2 font-bold text-white transition hover:bg-neutral-800"
-                >
-                  Next
-                </button>
-              </div>
+          <div className="relative mx-auto h-[560px] w-full max-w-[700px] md:mx-0 md:ml-auto">
+            <div className="absolute inset-x-0 top-0 h-[500px]">
+              {holoCards.map((card, index) => {
+                const position = getCarouselPosition(index, activeCardIndex)
+                const isActive = position === 0
+                const placement =
+                  position === -1
+                    ? '-translate-x-[82%] rotate-[-5deg] scale-[0.72] opacity-55'
+                    : position === 1
+                      ? 'translate-x-[-18%] rotate-[5deg] scale-[0.72] opacity-55'
+                      : '-translate-x-1/2 rotate-0 scale-100 opacity-100'
+
+                return (
+                  <button
+                    key={card.title}
+                    type="button"
+                    onClick={() => setActiveCardIndex(index)}
+                    className={`absolute left-1/2 top-0 rounded-[22px] text-left transition duration-300 ease-out ${isActive ? 'z-30' : 'z-10 blur-[0.2px]'} ${placement}`}
+                    aria-label={`Show ${card.title}`}
+                  >
+                    <div className="rounded-[22px] border border-neutral-900/10 bg-white p-4 shadow-[0_28px_70px_rgba(15,23,42,0.16)]">
+                      <HoloPhotoCard image={card.image} title={card.title} variant={card.variant} />
+                      <div className="px-2 pb-1 pt-5 text-center">
+                        <p className="text-2xl font-bold tracking-tight text-neutral-950">{card.title}</p>
+                        <p className="mt-1 text-lg text-neutral-500">{card.subtitle}</p>
+                      </div>
+                    </div>
+                  </button>
+                )
+              })}
             </div>
+
+            <button
+              type="button"
+              onClick={showPreviousCard}
+              className="absolute left-4 top-[210px] z-40 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-neutral-950 shadow-lg ring-1 ring-neutral-900/10 transition hover:bg-white"
+              aria-label="Previous card"
+            >
+              <ChevronLeft size={30} strokeWidth={2.5} />
+            </button>
+            <button
+              type="button"
+              onClick={showNextCard}
+              className="absolute right-4 top-[210px] z-40 flex h-12 w-12 items-center justify-center rounded-full bg-white/90 text-neutral-950 shadow-lg ring-1 ring-neutral-900/10 transition hover:bg-white"
+              aria-label="Next card"
+            >
+              <ChevronRight size={30} strokeWidth={2.5} />
+            </button>
           </div>
         </div>
       </section>

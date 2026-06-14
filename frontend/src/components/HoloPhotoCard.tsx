@@ -6,10 +6,37 @@ type HoloPhotoCardProps = {
   image: string
   title: string
   variant?: 'blue' | 'green' | 'violet'
+  rotateImage?: boolean
+  imageRotation?: 'clockwise' | 'counterclockwise'
+  crop?: 'default' | 'portrait'
+  tone?: 'normal' | 'soft'
+  loading?: 'eager' | 'lazy'
 }
 
-function HoloPhotoCard({ image, title, variant = 'blue' }: HoloPhotoCardProps) {
+function HoloPhotoCard({
+  image,
+  title,
+  variant = 'blue',
+  rotateImage = false,
+  imageRotation = 'counterclockwise',
+  crop = 'default',
+  tone = 'normal',
+  loading = 'lazy',
+}: HoloPhotoCardProps) {
   const cardRef = useRef<HTMLDivElement>(null)
+
+  const startPointerInteraction = (event: PointerEvent<HTMLDivElement>) => {
+    event.currentTarget.setPointerCapture(event.pointerId)
+    updatePointer(event)
+  }
+
+  const endPointerInteraction = (event: PointerEvent<HTMLDivElement>) => {
+    if (event.currentTarget.hasPointerCapture(event.pointerId)) {
+      event.currentTarget.releasePointerCapture(event.pointerId)
+    }
+
+    resetPointer()
+  }
 
   const updatePointer = (event: PointerEvent<HTMLDivElement>) => {
     const card = cardRef.current
@@ -51,7 +78,7 @@ function HoloPhotoCard({ image, title, variant = 'blue' }: HoloPhotoCardProps) {
     card.style.setProperty('--rotate-x', '0deg')
     card.style.setProperty('--rotate-y', '0deg')
     card.style.setProperty('--pointer-from-center', '0')
-    card.style.setProperty('--card-opacity', '0.62')
+    card.style.setProperty('--card-opacity', '0')
   }
 
   return (
@@ -59,11 +86,18 @@ function HoloPhotoCard({ image, title, variant = 'blue' }: HoloPhotoCardProps) {
       ref={cardRef}
       className="holo-card"
       data-variant={variant}
+      data-rotate-image={rotateImage}
+      data-image-rotation={imageRotation}
+      data-crop={crop}
+      data-tone={tone}
+      onPointerDown={startPointerInteraction}
       onPointerMove={updatePointer}
+      onPointerUp={endPointerInteraction}
+      onPointerCancel={endPointerInteraction}
       onPointerLeave={resetPointer}
     >
       <div className="holo-card__rotator">
-        <img className="holo-card__image" src={image} alt={title} />
+        <img className="holo-card__image" src={image} alt={title} decoding="async" loading={loading} />
         <div className="holo-card__shine" aria-hidden="true" />
         <div className="holo-card__glare" aria-hidden="true" />
       </div>

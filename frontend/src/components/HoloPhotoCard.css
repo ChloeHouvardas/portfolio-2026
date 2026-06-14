@@ -6,7 +6,7 @@
   --rotate-x: 0deg;
   --rotate-y: 0deg;
   --pointer-from-center: 0;
-  --card-opacity: 0.62;
+  --card-opacity: 0;
   --sun-1: hsl(2 100% 73%);
   --sun-2: hsl(53 100% 69%);
   --sun-3: hsl(93 100% 69%);
@@ -16,8 +16,12 @@
   aspect-ratio: 0.718;
   width: min(76vw, 340px);
   border-radius: 18px;
+  contain: layout paint style;
+  isolation: isolate;
   perspective: 900px;
+  touch-action: none;
   transform: translateZ(0);
+  user-select: none;
 }
 
 .holo-card[data-variant='green'] {
@@ -45,21 +49,10 @@
   border: 1px solid rgb(255 255 255 / 0.14);
   border-radius: inherit;
   background: rgb(9 10 15);
-  box-shadow:
-    0 30px 80px rgb(0 0 0 / 0.45),
-    0 0 34px rgb(86 196 255 / 0.18);
+  contain: paint;
+  isolation: isolate;
   transform: rotateX(var(--rotate-x)) rotateY(var(--rotate-y));
   transform-style: preserve-3d;
-  transition:
-    transform 220ms ease,
-    box-shadow 220ms ease;
-}
-
-.holo-card:hover .holo-card__rotator {
-  box-shadow:
-    0 34px 90px rgb(0 0 0 / 0.5),
-    0 0 46px rgb(86 196 255 / 0.24),
-    0 0 22px rgb(217 164 255 / 0.18);
 }
 
 .holo-card__image,
@@ -75,13 +68,40 @@
   height: 100%;
   width: 100%;
   object-fit: cover;
-  transform: rotate(-90deg) scale(1.35);
+  object-position: center;
   transform-origin: center;
+}
+
+.holo-card[data-rotate-image='false'] .holo-card__image {
+  transform: scale(1);
+}
+
+.holo-card[data-tone='soft'] .holo-card__image {
+  filter: brightness(0.78) contrast(0.96) saturate(0.92);
+}
+
+.holo-card[data-rotate-image='true'] .holo-card__image {
+  transform: rotate(-90deg) scale(1.35);
+}
+
+.holo-card[data-rotate-image='true'][data-image-rotation='clockwise'] .holo-card__image {
+  transform: rotate(90deg) scale(1.35);
+}
+
+.holo-card[data-crop='portrait'][data-rotate-image='true'][data-image-rotation='clockwise'] .holo-card__image {
+  transform: rotate(90deg) scale(1.62);
+  object-position: 50% 62%;
+}
+
+.holo-card[data-crop='portrait'][data-rotate-image='true'][data-image-rotation='counterclockwise'] .holo-card__image {
+  transform: rotate(-180deg) scale(1.62);
+  object-position: 50% 62%;
 }
 
 .holo-card__shine {
   opacity: var(--card-opacity);
   mix-blend-mode: color-dodge;
+  pointer-events: none;
   background-image:
     repeating-linear-gradient(
       0deg,
@@ -145,6 +165,7 @@
 .holo-card__glare {
   opacity: calc(var(--card-opacity) * 0.72);
   mix-blend-mode: hard-light;
+  pointer-events: none;
   background-image:
     radial-gradient(
       farthest-corner circle at var(--pointer-x) var(--pointer-y),

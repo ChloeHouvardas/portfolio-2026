@@ -1,13 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&display=swap');
 @import "tailwindcss";
-
-@font-face {
-  font-family: 'Atures';
-  src: url('./assets/fonts/Atures500PersonalUseOnly-GD6D.ttf') format('truetype');
-  font-weight: 500;
-  font-style: normal;
-  font-display: swap;
-}
 
 html {
   scroll-behavior: smooth;
@@ -15,4 +6,5 @@ html {
 
 body {
   margin: 0;
+  font-family: Calibri, Candara, Segoe, "Segoe UI", Optima, Arial, sans-serif;
 }

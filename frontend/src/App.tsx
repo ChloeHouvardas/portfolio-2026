@@ -1,5 +1,5 @@
-import { useEffect, useRef, useState, type PointerEvent } from 'react'
-import { ChevronLeft, ChevronRight } from 'lucide-react'
+import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react'
+import { ChevronLeft, ChevronRight, X } from 'lucide-react'
 
 import Galaxy from './components/Galaxy'
 import HoloPhotoCard from './components/HoloPhotoCard'
@@ -30,6 +30,18 @@ type Project = {
   previews: ProjectPreview[]
   githubUrl: string
 }
+
+type ProjectTransitionDirection = 'previous' | 'next'
+
+type ProjectCarouselTransition = {
+  fromIndex: number
+  toIndex: number
+  direction: ProjectTransitionDirection
+}
+
+const projectGalleryTransitionMs = 420
+const projectGalleryTransitionStartDelayMs = 40
+const projectTextFadeMs = 140
 
 const navItems = [
   ['Hero', 'hero'],
@@ -120,6 +132,12 @@ const projects: Project[] = [
     githubUrl: 'https://github.com/',
   },
 ]
+
+const projectPreviewImageSources = Array.from(
+  new Set(
+    projects.flatMap((project) => project.previews.map((preview) => preview.image).filter((image): image is string => Boolean(image))),
+  ),
+)
 
 const experience = [
   {
@@ -277,11 +295,17 @@ function SectionHeading({ title }: { title: string }) {
 function ProjectPreviewArtwork({ preview, imageLoading }: { preview: ProjectPreview; imageLoading: 'eager' | 'lazy' }) {
   return (
     <>
-      <div className="aspect-[4/3] overflow-hidden bg-neutral-200">
+      <div className="isolate aspect-[4/3] overflow-hidden bg-white [backface-visibility:hidden]">
         {preview.image ? (
-          <img className="h-full w-full object-cover" src={preview.image} alt={preview.alt} decoding="async" loading={imageLoading} />
+          <img
+            className="block h-full w-full transform-gpu object-cover [backface-visibility:hidden] [will-change:transform]"
+            src={preview.image}
+            alt={preview.alt}
+            decoding="async"
+            loading={imageLoading}
+          />
         ) : (
-          <div className={`flex h-full w-full items-end bg-gradient-to-br ${preview.accent} p-3 text-white`}>
+          <div className={`flex h-full w-full items-end bg-gradient-to-br ${preview.accent} p-3 text-white [backface-visibility:hidden]`}>
             <p className="text-lg font-bold leading-tight">{preview.title}</p>
           </div>
         )}
@@ -295,15 +319,27 @@ function App() {
   const [activeCardIndex, setActiveCardIndex] = useState(0)
   const [activeAboutIndex, setActiveAboutIndex] = useState(0)
   const [activeProjectIndex, setActiveProjectIndex] = useState(0)
+  const [projectTransition, setProjectTransition] = useState<ProjectCarouselTransition | null>(null)
+  const [isProjectTransitionActive, setIsProjectTransitionActive] = useState(false)
+  const [isProjectImageDecodePending, setIsProjectImageDecodePending] = useState(false)
+  const [isProjectTextVisible, setIsProjectTextVisible] = useState(true)
+  const [prefersReducedMotion, setPrefersReducedMotion] = useState(false)
   const [expandedProjectPreviewIndex, setExpandedProjectPreviewIndex] = useState<number | null>(null)
   const [isProjectPreviewExpanded, setIsProjectPreviewExpanded] = useState(false)
   const aboutSwipeStartX = useRef<number | null>(null)
   const aboutSwipePointerId = useRef<number | null>(null)
   const projectPreviewOpenAnimationFrame = useRef<number | null>(null)
   const projectPreviewCloseTimeout = useRef<number | null>(null)
+  const projectTransitionStartTimeout = useRef<number | null>(null)
+  const projectTransitionTimeout = useRef<number | null>(null)
+  const projectTextTimeout = useRef<number | null>(null)
+  const decodedProjectPreviewImages = useRef<Set<string>>(new Set())
+  const projectPreviewImageDecodePromises = useRef<Map<string, Promise<void>>>(new Map())
+  const projectNavigationInProgress = useRef(false)
   const activeAboutSlide = aboutSlides[activeAboutIndex]
   const activeProject = projects[activeProjectIndex]
   const expandedProjectPreview = expandedProjectPreviewIndex === null ? null : activeProject.previews[expandedProjectPreviewIndex]
+  const isProjectCarouselBusy = isProjectImageDecodePending || projectTransition !== null || !isProjectTextVisible
   const visibleHoloCards = [-1, 0, 1].map((position) => {
     const index = (activeCardIndex + position + holoCards.length) % holoCards.length
 
@@ -314,6 +350,90 @@ function App() {
     }
   })
 
+  const decodeProjectPreviewImage = useCallback((imageSource: string) => {
+    if (decodedProjectPreviewImages.current.has(imageSource)) {
+      return Promise.resolve()
+    }
+
+    const existingDecodePromise = projectPreviewImageDecodePromises.current.get(imageSource)
+
+    if (existingDecodePromise) {
+      return existingDecodePromise
+    }
+
+    const decodePromise = new Promise<void>((resolve) => {
+      const image = new Image()
+      let isSettled = false
+
+      const finish = () => {
+        if (isSettled) {
+          return
+        }
+
+        isSettled = true
+        decodedProjectPreviewImages.current.add(imageSource)
+        projectPreviewImageDecodePromises.current.delete(imageSource)
+        resolve()
+      }
+
+      const decodeLoadedImage = () => {
+        if (typeof image.decode === 'function') {
+          void image.decode().then(finish, finish)
+          return
+        }
+
+        finish()
+      }
+
+      image.decoding = 'async'
+      image.onload = decodeLoadedImage
+      image.onerror = finish
+      image.src = imageSource
+
+      if (image.complete) {
+        decodeLoadedImage()
+      }
+    })
+
+    projectPreviewImageDecodePromises.current.set(imageSource, decodePromise)
+
+    return decodePromise
+  }, [])
+
+  const decodeProjectPreviewImages = useCallback((project: Project) =>
+    Promise.all(project.previews.map((preview) => (preview.image ? decodeProjectPreviewImage(preview.image) : Promise.resolve()))).then(
+      () => undefined,
+    ), [decodeProjectPreviewImage])
+
+  useEffect(() => {
+    projectPreviewImageSources.forEach((imageSource) => {
+      void decodeProjectPreviewImage(imageSource)
+    })
+  }, [decodeProjectPreviewImage])
+
+  useEffect(() => {
+    const motionQuery = window.matchMedia('(prefers-reduced-motion: reduce)')
+    const updateReducedMotionPreference = () => {
+      setPrefersReducedMotion(motionQuery.matches)
+    }
+
+    updateReducedMotionPreference()
+
+    if (typeof motionQuery.addEventListener === 'function') {
+      motionQuery.addEventListener('change', updateReducedMotionPreference)
+    } else {
+      motionQuery.addListener(updateReducedMotionPreference)
+    }
+
+    return () => {
+      if (typeof motionQuery.removeEventListener === 'function') {
+        motionQuery.removeEventListener('change', updateReducedMotionPreference)
+      } else {
+        motionQuery.removeListener(updateReducedMotionPreference)
+      }
+    }
+  }, [])
+
   useEffect(() => {
     return () => {
       if (projectPreviewOpenAnimationFrame.current !== null) {
@@ -322,6 +442,18 @@ function App() {
 
       if (projectPreviewCloseTimeout.current !== null) {
         window.clearTimeout(projectPreviewCloseTimeout.current)
+      }
+
+      if (projectTransitionStartTimeout.current !== null) {
+        window.clearTimeout(projectTransitionStartTimeout.current)
+      }
+
+      if (projectTransitionTimeout.current !== null) {
+        window.clearTimeout(projectTransitionTimeout.current)
+      }
+
+      if (projectTextTimeout.current !== null) {
+        window.clearTimeout(projectTextTimeout.current)
       }
     }
   }, [])
@@ -411,15 +543,244 @@ function App() {
     setExpandedProjectPreviewIndex(null)
   }
 
-  const showPreviousProject = () => {
+  const clearProjectTransitionTimers = () => {
+    if (projectTransitionStartTimeout.current !== null) {
+      window.clearTimeout(projectTransitionStartTimeout.current)
+      projectTransitionStartTimeout.current = null
+    }
+
+    if (projectTransitionTimeout.current !== null) {
+      window.clearTimeout(projectTransitionTimeout.current)
+      projectTransitionTimeout.current = null
+    }
+
+    if (projectTextTimeout.current !== null) {
+      window.clearTimeout(projectTextTimeout.current)
+      projectTextTimeout.current = null
+    }
+  }
+
+  const showProject = async (direction: ProjectTransitionDirection) => {
+    if (projectNavigationInProgress.current || projectTransition !== null) {
+      return
+    }
+
+    projectNavigationInProgress.current = true
+    const nextProjectIndex =
+      direction === 'previous'
+        ? (activeProjectIndex - 1 + projects.length) % projects.length
+        : (activeProjectIndex + 1) % projects.length
+
     resetProjectPreview()
-    setActiveProjectIndex((currentIndex) => (currentIndex - 1 + projects.length) % projects.length)
+    setIsProjectImageDecodePending(true)
+    await decodeProjectPreviewImages(projects[nextProjectIndex])
+    setIsProjectImageDecodePending(false)
+
+    if (prefersReducedMotion) {
+      setActiveProjectIndex(nextProjectIndex)
+      projectNavigationInProgress.current = false
+      return
+    }
+
+    clearProjectTransitionTimers()
+    setProjectTransition({
+      fromIndex: activeProjectIndex,
+      toIndex: nextProjectIndex,
+      direction,
+    })
+    setIsProjectTransitionActive(false)
+
+    projectTransitionStartTimeout.current = window.setTimeout(() => {
+      setIsProjectTransitionActive(true)
+      projectTransitionStartTimeout.current = null
+    }, projectGalleryTransitionStartDelayMs)
+
+    setIsProjectTextVisible(false)
+    projectTextTimeout.current = window.setTimeout(() => {
+      setActiveProjectIndex(nextProjectIndex)
+      setIsProjectTextVisible(true)
+      projectTextTimeout.current = null
+    }, projectTextFadeMs)
+
+    projectTransitionTimeout.current = window.setTimeout(() => {
+      projectTransitionTimeout.current = null
+      setProjectTransition(null)
+      setIsProjectTransitionActive(false)
+      projectNavigationInProgress.current = false
+    }, projectGalleryTransitionStartDelayMs + projectGalleryTransitionMs)
+  }
+
+  const showPreviousProject = () => {
+    void showProject('previous')
   }
 
   const showNextProject = () => {
-    resetProjectPreview()
-    setActiveProjectIndex((currentIndex) => (currentIndex + 1) % projects.length)
+    void showProject('next')
   }
+
+  const getProjectGalleryMotionClass = (galleryRole: 'from' | 'to', direction: ProjectTransitionDirection) => {
+    const inactiveClass =
+      galleryRole === 'from'
+        ? 'translate-x-0'
+        : direction === 'previous'
+          ? '-translate-x-full'
+          : 'translate-x-full'
+
+    const activeClass =
+      galleryRole === 'to'
+        ? 'translate-x-0'
+        : direction === 'previous'
+          ? 'translate-x-full'
+          : '-translate-x-full'
+
+    return isProjectTransitionActive ? activeClass : inactiveClass
+  }
+
+  const getProjectGalleryLayerState = (projectIndex: number) => {
+    if (projectTransition) {
+      if (projectIndex === projectTransition.fromIndex) {
+        return {
+          className: `z-10 transition-all duration-[420ms] ease-out ${getProjectGalleryMotionClass('from', projectTransition.direction)}`,
+          galleryRole: 'from',
+          isInteractive: false,
+          shouldExposeTestIds: true,
+        }
+      }
+
+      if (projectIndex === projectTransition.toIndex) {
+        return {
+          className: `z-20 transition-all duration-[420ms] ease-out ${getProjectGalleryMotionClass('to', projectTransition.direction)}`,
+          galleryRole: 'to',
+          isInteractive: false,
+          shouldExposeTestIds: true,
+        }
+      }
+
+      return {
+        className: 'translate-x-full',
+        galleryRole: 'hidden',
+        isInteractive: false,
+        shouldExposeTestIds: false,
+      }
+    }
+
+    if (projectIndex === activeProjectIndex) {
+      return {
+        className: 'z-10 translate-x-0',
+        galleryRole: 'active',
+        isInteractive: true,
+        shouldExposeTestIds: true,
+      }
+    }
+
+    return {
+      className: 'translate-x-full',
+      galleryRole: 'hidden',
+      isInteractive: false,
+      shouldExposeTestIds: false,
+    }
+  }
+
+  const renderProjectGallery = (
+    project: Project,
+    projectIndex: number,
+    className = 'translate-x-0',
+    isInteractive = true,
+    galleryRole = 'active',
+    shouldExposeTestIds = true,
+  ) => {
+    const panelExpandedProjectPreview = projectIndex === activeProjectIndex ? expandedProjectPreview : null
+
+    return (
+      <div
+        key={project.title}
+        className={`absolute inset-0 transform-gpu [backface-visibility:hidden] [will-change:transform] ${className}`}
+        data-gallery-role={galleryRole}
+        aria-hidden={isInteractive ? undefined : 'true'}
+        aria-label={`${project.title} image gallery`}
+      >
+        <div
+          className={`relative h-full transition duration-500 ease-out ${
+            isProjectPreviewExpanded ? 'pointer-events-none scale-[0.96] opacity-0 blur-[1px]' : 'scale-100 opacity-100'
+          } ${isInteractive ? '' : 'pointer-events-none'}`}
+        >
+          {project.previews.map((preview, index) => {
+            const placement = polaroidPlacements[index % polaroidPlacements.length]
+
+            return (
+              <button
+                key={`project-${projectIndex}-preview-${preview.label}`}
+                type="button"
+                onClick={() => expandProjectPreview(index)}
+                disabled={!isInteractive}
+                className={`isolate absolute w-[42%] max-w-[220px] transform-gpu bg-white p-2 pb-4 text-left shadow-2xl shadow-black/30 transition duration-300 ease-out [backface-visibility:hidden] [will-change:transform] hover:z-20 hover:scale-[1.025] focus:z-20 focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default ${placement}`}
+                data-testid={shouldExposeTestIds ? 'project-polaroid' : undefined}
+                data-preview-label={shouldExposeTestIds ? preview.label : undefined}
+                aria-label={`Expand ${preview.label}`}
+              >
+                <ProjectPreviewArtwork preview={preview} imageLoading="eager" />
+              </button>
+            )
+          })}
+        </div>
+
+        {panelExpandedProjectPreview ? (
+          <>
+            <button
+              type="button"
+              className={`absolute inset-0 z-10 cursor-zoom-out bg-black/60 backdrop-blur-[2px] transition-opacity duration-300 ease-out ${
+                isProjectPreviewExpanded ? 'opacity-100' : 'opacity-0'
+              }`}
+              onClick={closeExpandedProjectPreview}
+              aria-label="Close expanded preview backdrop"
+            />
+            <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-6 sm:p-8 md:p-10">
+              <div
+                className={`pointer-events-auto relative isolate w-full max-w-[390px] transform-gpu bg-white p-2 pb-4 text-left shadow-2xl shadow-black/40 transition duration-500 ease-out [backface-visibility:hidden] [will-change:transform] ${
+                  isProjectPreviewExpanded ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-[0.92] opacity-0'
+                }`}
+                data-testid="project-preview-modal"
+              >
+                <button
+                  type="button"
+                  className="absolute right-3 top-3 z-10 flex h-9 w-9 items-center justify-center rounded-full bg-white/95 text-neutral-950 shadow-lg ring-1 ring-neutral-900/10 transition hover:bg-white"
+                  onClick={closeExpandedProjectPreview}
+                  aria-label="Close expanded project image"
+                >
+                  <X size={18} strokeWidth={2.4} />
+                </button>
+                <ProjectPreviewArtwork preview={panelExpandedProjectPreview} imageLoading="eager" />
+              </div>
+            </div>
+          </>
+        ) : null}
+      </div>
+    )
+  }
+
+  const renderProjectText = (project: Project) => (
+    <div
+      className={`absolute bottom-0 left-0 right-0 top-[320px] flex flex-col justify-between bg-white p-6 transition-opacity duration-150 ease-out md:left-[57.5%] md:top-0 md:p-8 ${
+        isProjectTextVisible ? 'opacity-100' : 'opacity-0'
+      }`}
+      data-testid="project-copy"
+      aria-live="polite"
+    >
+      <div>
+        <p className="text-sm uppercase tracking-[0.2em] text-neutral-700">{project.meta}</p>
+        <h3 className="mt-4 text-4xl font-bold tracking-tight text-neutral-950" data-testid="project-title">
+          {project.title}
+        </h3>
+        <p className="mt-6 text-lg leading-8 text-neutral-800">{project.copy}</p>
+      </div>
+
+      <div className="mt-10">
+        <a href={project.githubUrl} className="inline-flex rounded-md border border-neutral-300 px-4 py-3 font-bold text-neutral-950 transition hover:border-neutral-950">
+          Github
+        </a>
+      </div>
+    </div>
+  )
 
   return (
     <main className="min-h-screen overflow-x-hidden bg-white text-neutral-900">
@@ -592,7 +953,8 @@ function App() {
               <button
                 type="button"
                 onClick={showPreviousProject}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition hover:border-neutral-950"
+                disabled={isProjectCarouselBusy}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition hover:border-neutral-950 disabled:cursor-default disabled:opacity-50"
                 aria-label="Previous project"
               >
                 <ChevronLeft size={24} strokeWidth={2.4} />
@@ -600,7 +962,8 @@ function App() {
               <button
                 type="button"
                 onClick={showNextProject}
-                className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition hover:border-neutral-950"
+                disabled={isProjectCarouselBusy}
+                className="flex h-11 w-11 items-center justify-center rounded-full border border-neutral-300 bg-white text-neutral-950 transition hover:border-neutral-950 disabled:cursor-default disabled:opacity-50"
                 aria-label="Next project"
               >
                 <ChevronRight size={24} strokeWidth={2.4} />
@@ -608,9 +971,18 @@ function App() {
             </div>
           </div>
 
-          <article className="mt-10 overflow-hidden rounded-lg border border-neutral-900/10 bg-white">
-            <div className="grid md:grid-cols-[1.15fr_0.85fr]">
-              <div className="relative min-h-[320px] overflow-hidden bg-neutral-950 md:min-h-[430px]">
+          <article className="mt-10 overflow-hidden rounded-lg border border-neutral-900/10 bg-white" data-testid="featured-projects-carousel">
+            <div
+              className="relative min-h-[720px] bg-white sm:min-h-[660px] md:min-h-[430px]"
+              data-testid="project-card"
+              data-project-index={activeProjectIndex}
+              data-carousel-transition={projectTransition?.direction ?? 'idle'}
+              data-image-decode-pending={isProjectImageDecodePending ? 'true' : 'false'}
+            >
+              <div
+                className="absolute left-0 right-0 top-0 h-[320px] overflow-hidden bg-neutral-950 md:bottom-0 md:right-auto md:h-auto md:w-[57.5%]"
+                data-testid="project-gallery-region"
+              >
                 <div className="absolute inset-0 bg-black" />
                 <Galaxy
                   className="absolute inset-0 h-full w-full opacity-80"
@@ -629,72 +1001,25 @@ function App() {
                 />
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_42%,transparent,rgb(0_0_0_/_0.34)_62%,rgb(0_0_0_/_0.72)),linear-gradient(135deg,rgb(15_23_42_/_0.18),rgb(0_0_0_/_0.38))]" />
 
-                <div
-                  className={`relative h-full min-h-[320px] transition duration-500 ease-out md:min-h-[430px] ${
-                    isProjectPreviewExpanded ? 'pointer-events-none scale-[0.96] opacity-0 blur-[1px]' : 'scale-100 opacity-100'
-                  }`}
-                  aria-label={`${activeProject.title} image gallery`}
-                >
-                  {activeProject.previews.map((preview, index) => {
-                    const placement = polaroidPlacements[index % polaroidPlacements.length]
+                {projects.map((project, projectIndex) => {
+                  const galleryLayerState = getProjectGalleryLayerState(projectIndex)
 
-                    return (
-                      <button
-                        key={`${activeProject.title}-${preview.label}`}
-                        type="button"
-                        onClick={() => expandProjectPreview(index)}
-                        className={`absolute w-[42%] max-w-[220px] bg-white p-2 pb-4 text-left shadow-2xl shadow-black/30 transition duration-300 ease-out hover:z-20 hover:scale-[1.025] focus:z-20 focus:outline-none focus:ring-2 focus:ring-white ${placement}`}
-                        aria-label={`Expand ${preview.label}`}
-                      >
-                        <ProjectPreviewArtwork preview={preview} imageLoading={index === 0 ? 'eager' : 'lazy'} />
-                      </button>
-                    )
-                  })}
-                </div>
-
-                {expandedProjectPreview ? (
-                  <>
-                    <button
-                      type="button"
-                      className={`absolute inset-0 z-10 cursor-zoom-out bg-black/60 backdrop-blur-[2px] transition-opacity duration-300 ease-out ${
-                        isProjectPreviewExpanded ? 'opacity-100' : 'opacity-0'
-                      }`}
-                      onClick={closeExpandedProjectPreview}
-                      aria-label="Close expanded project image"
-                    />
-                    <div className="pointer-events-none absolute inset-0 z-20 flex items-center justify-center p-6 sm:p-8 md:p-10">
-                      <div
-                        className={`pointer-events-auto w-full max-w-[390px] bg-white p-2 pb-4 text-left shadow-2xl shadow-black/40 transition duration-500 ease-out ${
-                          isProjectPreviewExpanded ? 'translate-y-0 scale-100 opacity-100' : 'translate-y-3 scale-[0.92] opacity-0'
-                        }`}
-                      >
-                        <ProjectPreviewArtwork preview={expandedProjectPreview} imageLoading="eager" />
-                      </div>
-                    </div>
-                  </>
-                ) : null}
+                  return renderProjectGallery(
+                    project,
+                    projectIndex,
+                    galleryLayerState.className,
+                    galleryLayerState.isInteractive,
+                    galleryLayerState.galleryRole,
+                    galleryLayerState.shouldExposeTestIds,
+                  )
+                })}
               </div>
 
-              <div className="flex flex-col justify-between p-6 md:p-8">
-                <div>
-                  <p className="text-sm uppercase tracking-[0.2em] text-neutral-700">{activeProject.meta}</p>
-                  <h3 className="mt-4 text-4xl font-bold tracking-tight text-neutral-950">{activeProject.title}</h3>
-                  <p className="mt-6 text-lg leading-8 text-neutral-800">{activeProject.copy}</p>
-                </div>
-
-                <div className="mt-10">
-                  <a
-                    href={activeProject.githubUrl}
-                    className="inline-flex rounded-md border border-neutral-300 px-4 py-3 font-bold text-neutral-950 transition hover:border-neutral-950"
-                  >
-                    Github
-                  </a>
-                </div>
-              </div>
+              {renderProjectText(activeProject)}
             </div>
           </article>
 
-          <div className="mt-4 text-sm text-neutral-700">
+          <div className="mt-4 text-sm text-neutral-700" data-testid="project-counter">
             {activeProjectIndex + 1} / {projects.length}
           </div>
         </div>

@@ -213,6 +213,7 @@ export default function Galaxy({
     }
 
     let program;
+    let mesh;
 
     function resize() {
       const scale = 1;
@@ -223,6 +224,10 @@ export default function Galaxy({
           gl.canvas.height,
           gl.canvas.width / gl.canvas.height
         );
+
+        if (mesh) {
+          renderer.render({ scene: mesh });
+        }
       }
     }
     window.addEventListener('resize', resize, false);
@@ -258,11 +263,14 @@ export default function Galaxy({
       }
     });
 
-    const mesh = new Mesh(gl, { geometry, program });
+    mesh = new Mesh(gl, { geometry, program });
     let animateId;
 
     function update(t) {
-      animateId = requestAnimationFrame(update);
+      if (!disableAnimation || mouseInteraction) {
+        animateId = requestAnimationFrame(update);
+      }
+
       if (!disableAnimation) {
         program.uniforms.uTime.value = t * 0.001;
         program.uniforms.uStarSpeed.value = (t * 0.001 * starSpeed) / 10.0;
@@ -280,7 +288,13 @@ export default function Galaxy({
 
       renderer.render({ scene: mesh });
     }
-    animateId = requestAnimationFrame(update);
+
+    if (disableAnimation && !mouseInteraction) {
+      update(0);
+    } else {
+      animateId = requestAnimationFrame(update);
+    }
+
     ctn.appendChild(gl.canvas);
 
     function handleMouseMove(e) {
@@ -301,7 +315,9 @@ export default function Galaxy({
     }
 
     return () => {
-      cancelAnimationFrame(animateId);
+      if (animateId) {
+        cancelAnimationFrame(animateId);
+      }
       window.removeEventListener('resize', resize);
       if (mouseInteraction) {
         ctn.removeEventListener('mousemove', handleMouseMove);
@@ -329,5 +345,7 @@ export default function Galaxy({
     transparent
   ]);
 
-  return <div ref={ctnDom} className="galaxy-container" {...rest} />;
+  const className = rest.className ? `galaxy-container ${rest.className}` : 'galaxy-container';
+
+  return <div ref={ctnDom} {...rest} className={className} />;
 }

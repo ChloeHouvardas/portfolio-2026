@@ -3,19 +3,14 @@ import { PNG } from 'pngjs'
 
 const projects = [
   {
-    title: 'Portfolio system',
-    counter: '1 / 3',
-    labels: ['Portfolio preview', 'About carousel', 'Presentation image'],
+    title: 'Paper Cuts',
+    counter: '1 / 2',
+    labels: ['Gameplay loop', 'Devpost', 'We made it on stage!'],
   },
   {
-    title: 'Holographic photo card',
-    counter: '2 / 3',
-    labels: ['Interactive card study', 'Foil treatment', 'Motion detail'],
-  },
-  {
-    title: 'Interface prototypes',
-    counter: '3 / 3',
-    labels: ['Prototype archive', 'Process image', 'Visual study'],
+    title: 'Prism',
+    counter: '2 / 2',
+    labels: ['Extension view', 'Instagram analysis', 'We finally submitted!'],
   },
 ]
 
@@ -28,6 +23,57 @@ async function openFeaturedProjects(page: Page) {
   await page.goto('/#featured-projects')
   await page.locator('#featured-projects').scrollIntoViewIfNeeded()
   await expect(page.getByTestId('project-card')).toHaveAttribute('data-image-decode-pending', 'false')
+}
+
+async function dragCarousel(page: Page, locator: Locator, direction: 'next' | 'previous') {
+  const box = await locator.boundingBox()
+
+  expect(box, 'carousel should have a measurable box before dragging').not.toBeNull()
+
+  if (!box) {
+    return
+  }
+
+  const startX = box.x + box.width * (direction === 'next' ? 0.78 : 0.22)
+  const endX = box.x + box.width * (direction === 'next' ? 0.22 : 0.78)
+  const y = box.y + Math.min(Math.max(box.height * 0.35, 40), box.height - 40)
+
+  await locator.dispatchEvent('pointerdown', {
+    bubbles: true,
+    button: 0,
+    cancelable: true,
+    clientX: startX,
+    clientY: y,
+    pointerId: 1,
+    pointerType: 'touch',
+  })
+  await locator.dispatchEvent('pointermove', {
+    bubbles: true,
+    button: 0,
+    cancelable: true,
+    clientX: (startX + endX) / 2,
+    clientY: y,
+    pointerId: 1,
+    pointerType: 'touch',
+  })
+  await locator.dispatchEvent('pointerup', {
+    bubbles: true,
+    button: 0,
+    cancelable: true,
+    clientX: endX,
+    clientY: y,
+    pointerId: 1,
+    pointerType: 'touch',
+  })
+}
+
+async function triggerProjectNavigation(page: Page, direction: 'next' | 'previous', viewportName: string) {
+  if (viewportName === 'mobile') {
+    await dragCarousel(page, page.getByTestId('featured-projects-carousel'), direction)
+    return
+  }
+
+  await page.getByRole('button', { name: direction === 'next' ? 'Next project' : 'Previous project' }).click()
 }
 
 async function waitForProject(page: Page, projectIndex: number) {
@@ -120,7 +166,7 @@ function expectGalleryFrameIsNotBlank(buffer: Buffer, label: string) {
     }
   }
 
-  expect(darkSamples / samples, `${label} should retain dark Galaxy pixels`).toBeGreaterThan(0.12)
+  expect(darkSamples / samples, `${label} should retain dark gallery background pixels`).toBeGreaterThan(0.12)
   expect(brightSamples / samples, `${label} should retain bright polaroid pixels`).toBeGreaterThan(0.01)
   expect(nonWhiteSamples / samples, `${label} should not be a white flash frame`).toBeGreaterThan(0.35)
 }
@@ -160,7 +206,7 @@ async function captureTransition(page: Page, testInfo: TestInfo, direction: 'nex
   const gallery = page.getByTestId('project-gallery-region')
   const before = await screenshotGallery(page, gallery, testInfo, `${viewportName}-${direction}-before`)
 
-  const clickPromise = page.getByRole('button', { name: direction === 'next' ? 'Next project' : 'Previous project' }).click()
+  const navigationPromise = triggerProjectNavigation(page, direction, viewportName)
   await expect(card).toHaveAttribute('data-carousel-transition', direction)
   await page.waitForFunction(
     () => {
@@ -194,9 +240,10 @@ async function captureTransition(page: Page, testInfo: TestInfo, direction: 'nex
   await pauseActiveAnimations(page)
   const mid = await screenshotGallery(page, gallery, testInfo, `${viewportName}-${direction}-mid`)
   await resumeActiveAnimations(page)
-  await clickPromise
+  await navigationPromise
 
   await expectProject(page, targetProjectIndex)
+  await expect(page.getByTestId('project-preview-modal')).toHaveCount(0)
   const after = await screenshotGallery(page, gallery, testInfo, `${viewportName}-${direction}-after`)
 
   expect(sampledPixelDifferenceRatio(before, mid), `${viewportName} ${direction} mid-frame differs from start`).toBeGreaterThan(0.03)
@@ -213,17 +260,45 @@ for (const viewport of viewports) {
     await captureTransition(page, testInfo, 'previous', viewport.name, 0)
 
     for (let index = 1; index < projects.length; index += 1) {
-      await page.getByRole('button', { name: 'Next project' }).click()
+      await triggerProjectNavigation(page, 'next', viewport.name)
       await expectProject(page, index)
     }
   })
 }
 
+test('mobile swipe navigates the bird, about, and experience carousels', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 })
+  await page.goto('/')
+
+  const birdCarousel = page.getByTestId('bird-card-carousel')
+  await expect(birdCarousel).toHaveAttribute('data-active-card-index', '0')
+  await dragCarousel(page, birdCarousel, 'next')
+  await expect(birdCarousel).toHaveAttribute('data-active-card-index', '1')
+  await dragCarousel(page, birdCarousel, 'previous')
+  await expect(birdCarousel).toHaveAttribute('data-active-card-index', '0')
+
+  const aboutCarousel = page.getByLabel('About carousel')
+  await aboutCarousel.scrollIntoViewIfNeeded()
+  await expect(aboutCarousel).toHaveAttribute('data-about-index', '0')
+  await dragCarousel(page, aboutCarousel, 'next')
+  await expect(aboutCarousel).toHaveAttribute('data-about-index', '1')
+  await dragCarousel(page, aboutCarousel, 'previous')
+  await expect(aboutCarousel).toHaveAttribute('data-about-index', '0')
+
+  const experienceCarousel = page.getByTestId('experience-carousel')
+  await experienceCarousel.scrollIntoViewIfNeeded()
+  await expect(experienceCarousel).toHaveAttribute('data-experience-index', '0')
+  await dragCarousel(page, experienceCarousel, 'next')
+  await expect(experienceCarousel).toHaveAttribute('data-experience-index', '1')
+  await dragCarousel(page, experienceCarousel, 'previous')
+  await expect(experienceCarousel).toHaveAttribute('data-experience-index', '0')
+})
+
 test('expanded project preview still opens after carousel navigation', async ({ page }) => {
   await page.setViewportSize({ width: 1280, height: 900 })
   await openFeaturedProjects(page)
 
-  await page.getByRole('button', { name: 'Expand Portfolio preview' }).click()
+  await page.getByRole('button', { name: 'Expand Gameplay loop' }).click()
   await expect(page.getByTestId('project-preview-modal')).toBeVisible()
   await page.getByRole('button', { name: 'Close expanded project image' }).click()
   await expect(page.getByTestId('project-preview-modal')).toBeHidden()
@@ -231,7 +306,7 @@ test('expanded project preview still opens after carousel navigation', async ({ 
   await page.getByRole('button', { name: 'Next project' }).click()
   await expectProject(page, 1)
 
-  await page.getByRole('button', { name: 'Expand Interactive card study' }).click()
+  await page.getByRole('button', { name: 'Expand Extension view' }).click()
   await expect(page.getByTestId('project-preview-modal')).toBeVisible()
   await page.getByRole('button', { name: 'Close expanded project image' }).click()
   await expect(page.getByTestId('project-preview-modal')).toBeHidden()

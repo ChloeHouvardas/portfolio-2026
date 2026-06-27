@@ -24,3 +24,533 @@ body {
   min-height: 100%;
   background: white;
 }
+
+.holo-static-border {
+  --static-holo-1: hsl(186 78% 74%);
+  --static-holo-2: hsl(151 72% 76%);
+  --static-holo-3: hsl(55 82% 78%);
+  --static-holo-4: hsl(220 82% 80%);
+  --static-holo-5: hsl(274 76% 82%);
+  --static-holo-6: hsl(327 78% 82%);
+  --static-holo-ink: hsl(222 12% 50%);
+  border: 3px solid transparent;
+  background:
+    linear-gradient(rgb(255 255 255), rgb(255 255 255)) padding-box,
+    repeating-linear-gradient(
+      132deg,
+      var(--static-holo-ink) 0%,
+      var(--static-holo-1) 5%,
+      var(--static-holo-2) 9%,
+      var(--static-holo-ink) 13%,
+      var(--static-holo-4) 18%,
+      var(--static-holo-5) 23%,
+      var(--static-holo-6) 28%,
+      var(--static-holo-3) 34%,
+      var(--static-holo-ink) 40%
+    ) border-box;
+  box-shadow:
+    0 16px 34px rgb(15 23 42 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.95);
+}
+
+.contact-flip-card {
+  --contact-flip-rotate-y: 0deg;
+  display: block;
+  position: relative;
+  width: 14rem;
+  max-width: 100%;
+  aspect-ratio: 3 / 4;
+  justify-self: center;
+  perspective: 1000px;
+  -webkit-tap-highlight-color: transparent;
+  touch-action: manipulation;
+}
+
+.contact-flip-card__toggle {
+  display: block;
+  width: 100%;
+  height: 100%;
+}
+
+.contact-flip-card__toggle {
+  padding: 0;
+  border: 0;
+  background: transparent;
+  color: rgb(9 10 15);
+  cursor: pointer;
+}
+
+.contact-flip-card__inner {
+  position: relative;
+  display: block;
+  width: 100%;
+  height: 100%;
+  transform-origin: center;
+  transform: rotateY(var(--contact-flip-rotate-y));
+  transform-style: preserve-3d;
+  transition: transform 560ms cubic-bezier(0.2, 0.72, 0.2, 1);
+}
+
+.contact-flip-card[data-flipped='true'] .contact-flip-card__inner {
+  --contact-flip-rotate-y: 180deg;
+}
+
+.contact-flip-card__face {
+  --holo-control-sun-1: hsl(188 100% 72%);
+  --holo-control-sun-2: hsl(143 100% 72%);
+  --holo-control-sun-3: hsl(52 100% 73%);
+  --holo-control-sun-4: hsl(215 100% 76%);
+  --holo-control-sun-5: hsl(286 100% 78%);
+  --holo-control-sun-6: hsl(333 100% 78%);
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgb(9 10 15 / 0.14);
+  border-radius: 18px;
+  background: transparent;
+  box-shadow:
+    0 10px 24px rgb(15 23 42 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.95);
+  pointer-events: none;
+  transform: translateZ(0);
+  transform-style: preserve-3d;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  isolation: isolate;
+}
+
+.contact-flip-card__face::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.6;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      var(--holo-control-sun-1) 0%,
+      var(--holo-control-sun-2) 5%,
+      var(--holo-control-sun-3) 10%,
+      var(--holo-control-sun-4) 15%,
+      var(--holo-control-sun-5) 20%,
+      var(--holo-control-sun-6) 25%,
+      var(--holo-control-sun-1) 30%
+    ),
+    repeating-linear-gradient(
+      133deg,
+      rgb(8 13 28) 0%,
+      hsl(188 24% 70%) 3.8%,
+      hsl(190 46% 76%) 4.6%,
+      hsl(185 18% 56%) 5.4%,
+      rgb(8 13 28) 10%,
+      rgb(8 13 28) 12%
+    );
+  background-position:
+    0% 34%,
+    46% 50%;
+  background-size:
+    210% 720%,
+    310% 100%;
+  background-blend-mode: hue, hard-light;
+  filter: brightness(0.95) contrast(1.35) saturate(1.45);
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease,
+    background-position 420ms ease;
+}
+
+.contact-flip-card__face::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  border: 1px solid rgb(255 255 255 / 0.68);
+  border-radius: 14px;
+  background: rgb(255 255 255 / 0.98);
+  transition: opacity 220ms ease;
+}
+
+.contact-flip-card__back {
+  transform: rotateY(180deg);
+}
+
+.contact-flip-card__content {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  width: calc(100% - 28px);
+  min-height: calc(100% - 28px);
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 0.8rem;
+  padding: 1rem;
+  text-align: center;
+}
+
+.contact-flip-card__content--back {
+  padding-bottom: 4.2rem;
+}
+
+.contact-flip-card__icon {
+  color: rgb(9 10 15);
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.72));
+  transform: translateZ(0);
+  transition: transform 220ms ease;
+}
+
+.contact-flip-card__icon--front {
+  width: min(78%, 10rem);
+  height: auto;
+  opacity: 0.92;
+  filter:
+    drop-shadow(0 1px 0 rgb(255 255 255 / 0.72))
+    drop-shadow(0 16px 28px rgb(15 23 42 / 0.18));
+}
+
+.contact-flip-card__value {
+  display: block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, "Liberation Mono", "Courier New", monospace;
+  font-size: 1rem;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.contact-flip-card:hover .contact-flip-card__face,
+.contact-flip-card__toggle:focus-visible .contact-flip-card__face {
+  box-shadow:
+    0 16px 30px rgb(15 23 42 / 0.14),
+    inset 0 1px 0 rgb(255 255 255 / 0.95);
+}
+
+.contact-flip-card:hover .contact-flip-card__face::before,
+.contact-flip-card__toggle:focus-visible .contact-flip-card__face::before {
+  opacity: 0.88;
+  background-position:
+    0% 58%,
+    64% 38%;
+  filter: brightness(1.08) contrast(1.55) saturate(1.75);
+}
+
+.contact-flip-card:hover .contact-flip-card__face::after,
+.contact-flip-card__toggle:focus-visible .contact-flip-card__face::after {
+  opacity: 0.94;
+}
+
+.contact-flip-card__toggle:focus-visible {
+  outline: none;
+}
+
+.contact-flip-card__toggle:focus-visible .contact-flip-card__face {
+  outline: 2px solid rgb(9 10 15);
+  outline-offset: 4px;
+}
+
+.contact-flip-card:hover .contact-flip-card__icon,
+.contact-flip-card__toggle:focus-visible .contact-flip-card__icon {
+  transform: translateY(-1px) scale(1.06);
+}
+
+.contact-flip-card__copy {
+  --holo-control-sun-1: hsl(188 100% 72%);
+  --holo-control-sun-2: hsl(143 100% 72%);
+  --holo-control-sun-3: hsl(52 100% 73%);
+  --holo-control-sun-4: hsl(215 100% 76%);
+  --holo-control-sun-5: hsl(286 100% 78%);
+  --holo-control-sun-6: hsl(333 100% 78%);
+  position: absolute;
+  bottom: 1.1rem;
+  left: 50%;
+  z-index: 5;
+  display: flex;
+  height: 2.8rem;
+  width: 2.8rem;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  border: 1px solid rgb(9 10 15 / 0.14);
+  border-radius: 999px;
+  background: transparent;
+  color: rgb(9 10 15);
+  box-shadow:
+    0 10px 24px rgb(15 23 42 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.95);
+  isolation: isolate;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateX(-50%) translateY(5px);
+  transition:
+    opacity 180ms ease,
+    transform 180ms ease,
+    box-shadow 180ms ease;
+}
+
+.contact-flip-card__copy::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.6;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      var(--holo-control-sun-1) 0%,
+      var(--holo-control-sun-2) 5%,
+      var(--holo-control-sun-3) 10%,
+      var(--holo-control-sun-4) 15%,
+      var(--holo-control-sun-5) 20%,
+      var(--holo-control-sun-6) 25%,
+      var(--holo-control-sun-1) 30%
+    ),
+    repeating-linear-gradient(
+      133deg,
+      rgb(8 13 28) 0%,
+      hsl(188 24% 70%) 3.8%,
+      hsl(190 46% 76%) 4.6%,
+      hsl(185 18% 56%) 5.4%,
+      rgb(8 13 28) 10%,
+      rgb(8 13 28) 12%
+    );
+  background-position:
+    0% 34%,
+    46% 50%;
+  background-size:
+    210% 720%,
+    310% 100%;
+  background-blend-mode: hue, hard-light;
+  filter: brightness(0.95) contrast(1.35) saturate(1.45);
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease,
+    background-position 420ms ease;
+}
+
+.contact-flip-card__copy::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  border: 1px solid rgb(255 255 255 / 0.68);
+  border-radius: inherit;
+  background: rgb(255 255 255 / 0.98);
+  transition: opacity 220ms ease;
+}
+
+.contact-flip-card[data-flipped='true'] .contact-flip-card__copy {
+  opacity: 1;
+  pointer-events: auto;
+  transform: translateX(-50%) translateY(0);
+}
+
+.contact-flip-card__copy:hover,
+.contact-flip-card__copy:focus-visible {
+  transform: translateX(-50%) translateY(-2px);
+  box-shadow:
+    0 16px 30px rgb(15 23 42 / 0.14),
+    inset 0 1px 0 rgb(255 255 255 / 0.95);
+}
+
+.contact-flip-card__copy:focus-visible {
+  outline: 2px solid rgb(9 10 15);
+  outline-offset: 3px;
+}
+
+.contact-flip-card__copy:hover::before,
+.contact-flip-card__copy:focus-visible::before {
+  opacity: 0.88;
+  background-position:
+    0% 58%,
+    64% 38%;
+  filter: brightness(1.08) contrast(1.55) saturate(1.75);
+}
+
+.contact-flip-card__copy:hover::after,
+.contact-flip-card__copy:focus-visible::after {
+  opacity: 0.86;
+}
+
+.contact-flip-card__copy[data-copied='true']::before {
+  opacity: 0.9;
+  background-position:
+    0% 58%,
+    64% 38%;
+  filter: brightness(1.08) contrast(1.55) saturate(1.75);
+}
+
+.contact-flip-card__copy[data-copied='true']::after {
+  background: rgb(255 255 255 / 0.9);
+}
+
+.contact-flip-card__copy-icon {
+  position: relative;
+  z-index: 1;
+  filter: drop-shadow(0 1px 0 rgb(255 255 255 / 0.7));
+  transform: scale(1);
+  transition: transform 180ms ease;
+}
+
+.contact-flip-card__copy[data-copied='true'] .contact-flip-card__copy-icon {
+  transform: scale(1.08);
+}
+
+.holo-action,
+.holo-icon-button,
+.holo-skill-chip {
+  --holo-control-sun-1: hsl(188 100% 72%);
+  --holo-control-sun-2: hsl(143 100% 72%);
+  --holo-control-sun-3: hsl(52 100% 73%);
+  --holo-control-sun-4: hsl(215 100% 76%);
+  --holo-control-sun-5: hsl(286 100% 78%);
+  --holo-control-sun-6: hsl(333 100% 78%);
+  isolation: isolate;
+  overflow: hidden;
+  border: 1px solid rgb(9 10 15 / 0.14);
+  background: transparent;
+  box-shadow:
+    0 10px 24px rgb(15 23 42 / 0.1),
+    inset 0 1px 0 rgb(255 255 255 / 0.95);
+  transform: translateZ(0);
+  transition:
+    transform 220ms ease,
+    box-shadow 220ms ease;
+}
+
+.holo-action::before,
+.holo-icon-button::before,
+.holo-skill-chip::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  z-index: -2;
+  opacity: 0.6;
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      var(--holo-control-sun-1) 0%,
+      var(--holo-control-sun-2) 5%,
+      var(--holo-control-sun-3) 10%,
+      var(--holo-control-sun-4) 15%,
+      var(--holo-control-sun-5) 20%,
+      var(--holo-control-sun-6) 25%,
+      var(--holo-control-sun-1) 30%
+    ),
+    repeating-linear-gradient(
+      133deg,
+      rgb(8 13 28) 0%,
+      hsl(188 24% 70%) 3.8%,
+      hsl(190 46% 76%) 4.6%,
+      hsl(185 18% 56%) 5.4%,
+      rgb(8 13 28) 10%,
+      rgb(8 13 28) 12%
+    );
+  background-position:
+    0% 34%,
+    46% 50%;
+  background-size:
+    210% 720%,
+    310% 100%;
+  background-blend-mode: hue, hard-light;
+  filter: brightness(0.95) contrast(1.35) saturate(1.45);
+  transition:
+    opacity 220ms ease,
+    filter 220ms ease,
+    background-position 420ms ease;
+}
+
+.holo-action::after,
+.holo-icon-button::after,
+.holo-skill-chip::after {
+  content: '';
+  position: absolute;
+  inset: 3px;
+  z-index: -1;
+  border-radius: inherit;
+  border: 1px solid rgb(255 255 255 / 0.68);
+  background: rgb(255 255 255 / 0.98);
+  transition: opacity 220ms ease;
+}
+
+.holo-action:hover,
+.holo-action:focus-visible,
+.holo-icon-button:not(:disabled):hover,
+.holo-icon-button:not(:disabled):focus-visible {
+  transform: translateY(-2px) translateZ(0);
+  box-shadow:
+    0 16px 30px rgb(15 23 42 / 0.14),
+    inset 0 1px 0 rgb(255 255 255 / 0.95);
+}
+
+.holo-action:hover::before,
+.holo-action:focus-visible::before,
+.holo-icon-button:not(:disabled):hover::before,
+.holo-icon-button:not(:disabled):focus-visible::before {
+  opacity: 0.88;
+  background-position:
+    0% 58%,
+    64% 38%;
+  filter: brightness(1.08) contrast(1.55) saturate(1.75);
+}
+
+.holo-action:hover::after,
+.holo-action:focus-visible::after,
+.holo-icon-button:not(:disabled):hover::after,
+.holo-icon-button:not(:disabled):focus-visible::after {
+  opacity: 0.86;
+}
+
+.holo-action--dark {
+  color: rgb(9 10 15);
+}
+
+.holo-icon-button {
+  color: rgb(9 10 15);
+}
+
+.holo-icon-button:disabled {
+  cursor: default;
+  opacity: 0.54;
+  transform: none;
+}
+
+.holo-icon-button:disabled::before,
+.holo-icon-button:disabled::after {
+  opacity: 0.28;
+}
+
+.holo-skill-chip {
+  color: rgb(23 23 23);
+}
+
+.holo-action[aria-selected='true']::before {
+  opacity: 0.82;
+}
+
+.holo-action[aria-selected='true']::after {
+  background: rgb(255 255 255 / 0.96);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-flip-card__inner,
+  .contact-flip-card__face::before,
+  .contact-flip-card__face::after,
+  .contact-flip-card__icon,
+  .contact-flip-card__copy,
+  .contact-flip-card__copy::before,
+  .contact-flip-card__copy::after,
+  .holo-action,
+  .holo-action::before,
+  .holo-action::after,
+  .holo-icon-button,
+  .holo-icon-button::before,
+  .holo-icon-button::after,
+  .holo-skill-chip,
+  .holo-skill-chip::before,
+  .holo-skill-chip::after {
+    transition: none;
+  }
+}

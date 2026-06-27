@@ -1,7 +1,6 @@
-import { useCallback, useEffect, useRef, useState, type PointerEvent } from 'react'
+import { useCallback, useEffect, useRef, useState, type MouseEvent, type MutableRefObject, type PointerEvent } from 'react'
 import { Check, ChevronDown, ChevronLeft, ChevronRight, Copy, Mail, X } from 'lucide-react'
 
-import Galaxy from './components/Galaxy'
 import HoloPhotoCard from './components/HoloPhotoCard'
 import bird4323 from './assets/birds/optimized/IMG_4323.jpg'
 import bird4330 from './assets/birds/optimized/IMG_4330.jpg'
@@ -14,6 +13,12 @@ import bird4692 from './assets/birds/optimized/IMG_4692.jpg'
 import aboutPhoto from './assets/photos/optimized/IMG_0224_sdr.jpg'
 import chloeOranges from './assets/photos/optimized/chloe_oranges.jpg'
 import chinaPresentation from './assets/photos/optimized/china_presentation.jpeg'
+import paperCutsDevpost from './assets/photos/optimized/paper_cuts/paper_cuts_devpost.jpg'
+import paperCutsGameplay from './assets/photos/optimized/paper_cuts/paper_cuts_gameplay.jpg'
+import paperCutsStage from './assets/photos/optimized/paper_cuts/group_stage.jpg'
+import prismExtension from './assets/photos/optimized/prism/extension_view.jpg'
+import prismGroup from './assets/photos/optimized/prism/group_photo.jpg'
+import prismInstagram from './assets/photos/optimized/prism/instagram_view.jpg'
 
 type ProjectPreview = {
   label: string
@@ -26,6 +31,7 @@ type ProjectPreview = {
 type Project = {
   title: string
   meta: string
+  award: string
   copy: string
   previews: ProjectPreview[]
   githubUrl: string
@@ -37,6 +43,13 @@ type ProjectCarouselTransition = {
   fromIndex: number
   toIndex: number
   direction: ProjectTransitionDirection
+}
+
+type SwipeState = {
+  pointerId: number | null
+  startX: number | null
+  startY: number | null
+  didSwipe: boolean
 }
 
 type ExperienceRole = {
@@ -99,92 +112,146 @@ const projectGalleryTransitionMs = 420
 const projectGalleryTransitionStartDelayMs = 40
 const projectTextFadeMs = 140
 const contactCopiedResetMs = 2600
+const carouselSwipeThresholdPx = 48
+const birdCardSwipeThresholdPx = 28
+const carouselSwipeIntentRatio = 1.15
+const birdCardSwipeIntentRatio = 0.8
+
+const createSwipeState = (): SwipeState => ({
+  pointerId: null,
+  startX: null,
+  startY: null,
+  didSwipe: false,
+})
+
+const startCarouselSwipe = (swipeState: MutableRefObject<SwipeState>, event: PointerEvent<HTMLElement>) => {
+  if (event.pointerType === 'mouse' && event.button !== 0) {
+    return
+  }
+
+  swipeState.current.pointerId = event.pointerId
+  swipeState.current.startX = event.clientX
+  swipeState.current.startY = event.clientY
+  swipeState.current.didSwipe = false
+}
+
+const finishCarouselSwipe = (
+  swipeState: MutableRefObject<SwipeState>,
+  event: PointerEvent<HTMLElement>,
+  showPrevious: () => void,
+  showNext: () => void,
+  swipeThresholdPx = carouselSwipeThresholdPx,
+  swipeIntentRatio = carouselSwipeIntentRatio,
+) => {
+  const { pointerId, startX, startY } = swipeState.current
+
+  if (pointerId !== event.pointerId || startX === null || startY === null) {
+    return
+  }
+
+  const swipeDistanceX = event.clientX - startX
+  const swipeDistanceY = event.clientY - startY
+  const isHorizontalSwipe =
+    Math.abs(swipeDistanceX) >= swipeThresholdPx && Math.abs(swipeDistanceX) > Math.abs(swipeDistanceY) * swipeIntentRatio
+
+  swipeState.current.pointerId = null
+  swipeState.current.startX = null
+  swipeState.current.startY = null
+
+  if (!isHorizontalSwipe) {
+    return
+  }
+
+  event.preventDefault()
+  swipeState.current.didSwipe = true
+
+  if (swipeDistanceX > 0) {
+    showPrevious()
+  } else {
+    showNext()
+  }
+}
+
+const cancelCarouselSwipe = (swipeState: MutableRefObject<SwipeState>) => {
+  swipeState.current.pointerId = null
+  swipeState.current.startX = null
+  swipeState.current.startY = null
+}
+
+const stopClickAfterSwipe = (swipeState: MutableRefObject<SwipeState>, event: MouseEvent<HTMLElement>) => {
+  if (!swipeState.current.didSwipe) {
+    return
+  }
+
+  event.preventDefault()
+  event.stopPropagation()
+  swipeState.current.didSwipe = false
+}
 
 const navItems = [
   ['Welcome', 'hero'],
   ['About', 'about'],
   ['Featured Projects', 'featured-projects'],
   ['Experience', 'experience'],
-  ['Skills', 'skills'],
   ['Contact', 'contact'],
 ]
 
 const projects: Project[] = [
   {
-    title: 'Portfolio system',
-    meta: 'React / TypeScript / Visual systems',
-    copy: 'A personal site evolving into a compact archive of projects, experiments, and technical notes. This project can hold screenshots, process notes, and the decisions behind the visual system.',
+    title: 'Paper Cuts',
+    meta: 'HTML / CSS / JavaScript / HTML5 Canvas / Node.js / WebSockets / FastAPI / Redis / AWS Trainium',
+    award: 'Won 1st Place Cal Hacks AI Hackathon - $5000 USD',
+    copy:
+      'A creation-first game platform where players draw game pieces, turn sketches into playable sprites, and drop them into a live world. Paper Cuts combines a vanilla Canvas game engine, Node WebSocket relay, FastAPI services, AI recognition and sprite enhancement, safe mechanic composition, and Redis vector memory.',
     previews: [
       {
-        label: 'Portfolio preview',
-        title: 'Portfolio system',
-        accent: 'from-neutral-950 via-neutral-700 to-neutral-300',
+        label: 'Gameplay loop',
+        title: 'Draw to play',
+        image: paperCutsGameplay,
+        alt: 'Paper Cuts gameplay with hand-drawn platform fighter characters and objects',
       },
       {
-        label: 'About carousel',
-        title: 'Personal profile cards',
-        image: aboutPhoto,
-        alt: 'Chloe by the water',
+        label: 'Devpost',
+        title: 'Paper Cuts',
+        image: paperCutsDevpost,
+        alt: 'Paper Cuts project page artwork with a hand-drawn game screenshot',
       },
       {
-        label: 'Presentation image',
-        title: 'Image-led sections',
-        image: chinaPresentation,
-        alt: 'Chloe presenting with a microphone',
+        label: 'We made it on stage!',
+        title: 'Grand prize winner',
+        image: paperCutsStage,
+        alt: 'Paper Cuts team on stage holding a grand prize check',
       },
     ],
-    githubUrl: 'https://github.com/',
+    githubUrl: 'https://github.com/Jeremyliu-621/paper-cuts',
   },
   {
-    title: 'Holographic photo card',
-    meta: 'CSS interaction / Image treatment',
-    copy: 'A Pokemon V Alternate Art-inspired photo treatment using layered gradients, glare, pointer motion, and optimized image assets. The interaction is designed to feel tactile on desktop and mobile.',
+    title: 'Prism',
+    meta: 'React / FastAPI / Claude / Brave Search / Google Vision / Chrome Extensions',
+    award: 'Won 1st Place Hack Her Hackathon - $500',
+    copy:
+      'A Chrome extension that helps people evaluate online content in context. Prism scans social posts, images, videos, and profiles for misleading patterns, then surfaces concise risk labels, source checks, and supporting context inside the browsing flow.',
     previews: [
       {
-        label: 'Interactive card study',
-        title: 'Blue Jay',
-        image: bird4323,
-        alt: 'Blue jay in Toronto, Ontario',
+        label: 'Extension view',
+        title: 'Browser companion',
+        image: prismExtension,
+        alt: 'Prism Chrome extension panel open in a browser window',
       },
       {
-        label: 'Foil treatment',
-        title: 'Northern Cardinal (male)',
-        image: bird4330,
-        alt: 'Northern cardinal male in Toronto, Ontario',
+        label: 'Instagram analysis',
+        title: 'Context labels',
+        image: prismInstagram,
+        alt: 'Prism analyzing Instagram content with misleading and context labels',
       },
       {
-        label: 'Motion detail',
-        title: 'Northern Cardinal (male)',
-        image: bird4615,
-        alt: 'Northern cardinal male in Toronto, Ontario',
+        label: 'We finally submitted!',
+        title: 'Prism team',
+        image: prismGroup,
+        alt: 'Prism team showing the extension on a laptop',
       },
     ],
-    githubUrl: 'https://github.com/',
-  },
-  {
-    title: 'Interface prototypes',
-    meta: 'Frontend / Product thinking',
-    copy: 'Focused prototypes for turning rough workflows into clear, usable browser experiences. This space can include problem framing, before-and-after screenshots, and implementation details.',
-    previews: [
-      {
-        label: 'Prototype archive',
-        title: 'Interface prototypes',
-        accent: 'from-emerald-500 via-cyan-500 to-violet-400',
-      },
-      {
-        label: 'Process image',
-        title: 'Build notes',
-        image: chloeOranges,
-        alt: 'Chloe standing in front of orange trees',
-      },
-      {
-        label: 'Visual study',
-        title: 'Detail archive',
-        image: bird4538,
-        alt: 'Bird perched in natural light',
-      },
-    ],
-    githubUrl: 'https://github.com/',
+    githubUrl: 'https://github.com/ChloeHouvardas/prism',
   },
 ]
 
@@ -201,12 +268,10 @@ const experienceCategories: ExperienceCategory[] = [
       {
         title: 'Software Engineering Intern',
         meta: 'Digitara Interactive / May 2023 to August 2023',
-        copy: 'Placeholder copy for the role summary, projects, and impact.',
       },
       {
         title: 'Data Analyst',
         meta: 'Statistics Canada / May 2024 to October 2024',
-        copy: 'Placeholder copy for analytics work, tools, and contributions.',
       },
       {
         title: 'Volleyball Coach',
@@ -216,7 +281,6 @@ const experienceCategories: ExperienceCategory[] = [
       {
         title: 'Sales and Trading Intern',
         meta: 'National Bank / May 2025 to August 2025',
-        copy: 'Placeholder copy for desk experience, market work, and outcomes.',
       },
     ],
   },
@@ -253,52 +317,42 @@ const experienceCategories: ExperienceCategory[] = [
       },
     ],
   },
-  {
-    label: 'Awards',
-    items: [
-      {
-        title: 'Award one',
-        meta: 'Placeholder',
-        copy: 'Add award name, issuer, date, and the reason it matters.',
-      },
-      {
-        title: 'Award two',
-        meta: 'Placeholder',
-        copy: 'A second placeholder for scholarships, hackathon wins, or recognitions.',
-      },
-      {
-        title: 'Award three',
-        meta: 'Placeholder',
-        copy: 'Use this block for another award or recognition.',
-      },
-      {
-        title: 'Award four',
-        meta: 'Placeholder',
-        copy: 'Use this block for another award or recognition.',
-      },
-      {
-        title: 'Award five',
-        meta: 'Placeholder',
-        copy: 'Use this block for another award or recognition.',
-      },
-      {
-        title: 'Award six',
-        meta: 'Placeholder',
-        copy: 'Use this block for another award or recognition.',
-      },
-    ],
-  },
-]
-
-const skills = [
-  'React',
-  'TypeScript',
-  'Vite',
-  'Tailwind CSS',
-  'CSS animation',
-  'Responsive UI',
-  'Interaction design',
-  'Frontend systems',
+  // TODO: Restore the Awards category when real awards content is ready.
+  // {
+  //   label: 'Awards',
+  //   items: [
+  //     {
+  //       title: 'Award one',
+  //       meta: 'Placeholder',
+  //       copy: 'Add award name, issuer, date, and the reason it matters.',
+  //     },
+  //     {
+  //       title: 'Award two',
+  //       meta: 'Placeholder',
+  //       copy: 'A second placeholder for scholarships, hackathon wins, or recognitions.',
+  //     },
+  //     {
+  //       title: 'Award three',
+  //       meta: 'Placeholder',
+  //       copy: 'Use this block for another award or recognition.',
+  //     },
+  //     {
+  //       title: 'Award four',
+  //       meta: 'Placeholder',
+  //       copy: 'Use this block for another award or recognition.',
+  //     },
+  //     {
+  //       title: 'Award five',
+  //       meta: 'Placeholder',
+  //       copy: 'Use this block for another award or recognition.',
+  //     },
+  //     {
+  //       title: 'Award six',
+  //       meta: 'Placeholder',
+  //       copy: 'Use this block for another award or recognition.',
+  //     },
+  //   ],
+  // },
 ]
 
 const contactMethods: ContactMethod[] = [
@@ -427,9 +481,9 @@ const aboutSlides = [
 ]
 
 const polaroidPlacements = [
-  'left-[7%] top-[12%] rotate-[-8deg]',
-  'right-[8%] top-[15%] rotate-[7deg]',
-  'left-[31%] bottom-[8%] rotate-[2deg]',
+  'left-[10%] top-[12%] rotate-[-8deg] sm:left-[7%]',
+  'right-[10%] top-[15%] rotate-[7deg] sm:right-[8%]',
+  'left-[30%] bottom-[8%] rotate-[2deg] sm:left-[31%]',
 ]
 
 function SectionHeading({ title }: { title: string }) {
@@ -477,8 +531,10 @@ function App() {
   const [activeExperienceCategoryIndex, setActiveExperienceCategoryIndex] = useState(0)
   const [flippedContactMethodIds, setFlippedContactMethodIds] = useState<ContactMethodId[]>([])
   const [copiedContactMethodIds, setCopiedContactMethodIds] = useState<ContactMethodId[]>([])
-  const aboutSwipeStartX = useRef<number | null>(null)
-  const aboutSwipePointerId = useRef<number | null>(null)
+  const holoCardsSwipe = useRef(createSwipeState())
+  const aboutSwipe = useRef(createSwipeState())
+  const projectSwipe = useRef(createSwipeState())
+  const experienceSwipe = useRef(createSwipeState())
   const projectPreviewOpenAnimationFrame = useRef<number | null>(null)
   const projectPreviewCloseTimeout = useRef<number | null>(null)
   const projectTransitionStartTimeout = useRef<number | null>(null)
@@ -669,36 +725,6 @@ function App() {
 
   const showNextAboutSlide = () => {
     setActiveAboutIndex((currentIndex) => (currentIndex + 1) % aboutSlides.length)
-  }
-
-  const startAboutSwipe = (event: PointerEvent<HTMLElement>) => {
-    aboutSwipeStartX.current = event.clientX
-    aboutSwipePointerId.current = event.pointerId
-  }
-
-  const finishAboutSwipe = (event: PointerEvent<HTMLElement>) => {
-    if (aboutSwipePointerId.current !== event.pointerId || aboutSwipeStartX.current === null) {
-      return
-    }
-
-    const swipeDistance = event.clientX - aboutSwipeStartX.current
-    aboutSwipeStartX.current = null
-    aboutSwipePointerId.current = null
-
-    if (Math.abs(swipeDistance) < 48) {
-      return
-    }
-
-    if (swipeDistance > 0) {
-      showPreviousAboutSlide()
-    } else {
-      showNextAboutSlide()
-    }
-  }
-
-  const cancelAboutSwipe = () => {
-    aboutSwipeStartX.current = null
-    aboutSwipePointerId.current = null
   }
 
   const clearProjectPreviewTimers = () => {
@@ -918,7 +944,7 @@ function App() {
                 type="button"
                 onClick={() => expandProjectPreview(index)}
                 disabled={!isInteractive}
-                className={`isolate absolute w-[42%] max-w-[220px] transform-gpu bg-white p-2 pb-4 text-left shadow-2xl shadow-black/30 transition duration-300 ease-out [backface-visibility:hidden] [will-change:transform] hover:z-20 hover:scale-[1.025] focus:z-20 focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default ${placement}`}
+                className={`isolate absolute w-[38%] max-w-[220px] transform-gpu bg-white p-2 pb-4 text-left shadow-2xl shadow-black/30 transition duration-300 ease-out [backface-visibility:hidden] [will-change:transform] hover:z-20 hover:scale-[1.025] focus:z-20 focus:outline-none focus:ring-2 focus:ring-white disabled:cursor-default sm:w-[42%] ${placement}`}
                 data-testid={shouldExposeTestIds ? 'project-polaroid' : undefined}
                 data-preview-label={shouldExposeTestIds ? preview.label : undefined}
                 aria-label={`Expand ${preview.label}`}
@@ -965,7 +991,7 @@ function App() {
 
   const renderProjectText = (project: Project) => (
     <div
-      className={`absolute bottom-0 left-0 right-0 top-[320px] flex flex-col justify-between bg-white p-6 transition-opacity duration-150 ease-out md:left-[57.5%] md:top-0 md:p-8 ${
+      className={`absolute bottom-0 left-0 right-0 top-[320px] flex flex-col justify-start bg-white p-6 transition-opacity duration-150 ease-out md:left-[57.5%] md:top-0 md:justify-between md:p-8 ${
         isProjectTextVisible ? 'opacity-100' : 'opacity-0'
       }`}
       data-testid="project-copy"
@@ -976,10 +1002,11 @@ function App() {
         <h3 className="mt-4 text-4xl font-bold tracking-tight text-neutral-950" data-testid="project-title">
           {project.title}
         </h3>
+        <p className="mt-3 text-sm font-bold text-neutral-800">{project.award}</p>
         <p className="mt-6 text-lg leading-8 text-neutral-800">{project.copy}</p>
       </div>
 
-      <div className="mt-10">
+      <div className="mt-6 md:mt-10">
         <a href={project.githubUrl} className="holo-action relative inline-flex rounded-md px-4 py-3 font-bold text-neutral-950 transition">
           Github
         </a>
@@ -1023,7 +1050,16 @@ function App() {
               </a>
             </div>
           </div>
-          <div className="relative mx-auto h-[470px] w-full max-w-[700px] sm:h-[520px] md:mx-0 md:ml-auto md:h-[560px]">
+          <div
+            className="relative mx-auto h-[470px] w-full max-w-[700px] touch-pan-y sm:h-[520px] md:mx-0 md:ml-auto md:h-[560px]"
+            data-testid="bird-card-carousel"
+            data-active-card-index={activeCardIndex}
+            onPointerDown={(event) => startCarouselSwipe(holoCardsSwipe, event)}
+            onPointerUp={(event) => finishCarouselSwipe(holoCardsSwipe, event, showPreviousCard, showNextCard)}
+            onPointerCancel={() => cancelCarouselSwipe(holoCardsSwipe)}
+            onPointerLeave={() => cancelCarouselSwipe(holoCardsSwipe)}
+            onClickCapture={(event) => stopClickAfterSwipe(holoCardsSwipe, event)}
+          >
             <div className="absolute inset-x-0 top-0 h-[430px] sm:h-[480px] md:h-[500px]">
               {visibleHoloCards.map((card) => {
                 const placement =
@@ -1053,11 +1089,28 @@ function App() {
                 )
               })}
             </div>
+            <div
+              className="absolute inset-x-0 top-0 z-50 h-[430px] touch-pan-y md:hidden"
+              aria-hidden="true"
+              onPointerDown={(event) => startCarouselSwipe(holoCardsSwipe, event)}
+              onPointerUp={(event) =>
+                finishCarouselSwipe(
+                  holoCardsSwipe,
+                  event,
+                  showPreviousCard,
+                  showNextCard,
+                  birdCardSwipeThresholdPx,
+                  birdCardSwipeIntentRatio,
+                )
+              }
+              onPointerCancel={() => cancelCarouselSwipe(holoCardsSwipe)}
+              onPointerLeave={() => cancelCarouselSwipe(holoCardsSwipe)}
+            />
 
             <button
               type="button"
               onClick={showPreviousCard}
-              className="holo-icon-button absolute left-2 top-[170px] z-40 flex h-11 w-11 items-center justify-center rounded-full transition sm:left-4 sm:top-[195px] sm:h-12 sm:w-12 md:top-[210px]"
+              className="holo-icon-button absolute left-2 top-[170px] z-40 hidden h-11 w-11 items-center justify-center rounded-full transition sm:left-4 sm:top-[195px] sm:h-12 sm:w-12 md:flex md:top-[210px]"
               aria-label="Previous card"
             >
               <ChevronLeft size={30} strokeWidth={2.5} />
@@ -1065,7 +1118,7 @@ function App() {
             <button
               type="button"
               onClick={showNextCard}
-              className="holo-icon-button absolute right-2 top-[170px] z-40 flex h-11 w-11 items-center justify-center rounded-full transition sm:right-4 sm:top-[195px] sm:h-12 sm:w-12 md:top-[210px]"
+              className="holo-icon-button absolute right-2 top-[170px] z-40 hidden h-11 w-11 items-center justify-center rounded-full transition sm:right-4 sm:top-[195px] sm:h-12 sm:w-12 md:flex md:top-[210px]"
               aria-label="Next card"
             >
               <ChevronRight size={30} strokeWidth={2.5} />
@@ -1080,14 +1133,16 @@ function App() {
           <article
             className="holo-static-border mt-10 touch-pan-y rounded-lg bg-white p-6 md:p-8"
             aria-label="About carousel"
-            onPointerDown={startAboutSwipe}
-            onPointerUp={finishAboutSwipe}
-            onPointerCancel={cancelAboutSwipe}
-            onPointerLeave={cancelAboutSwipe}
+            data-about-index={activeAboutIndex}
+            onPointerDown={(event) => startCarouselSwipe(aboutSwipe, event)}
+            onPointerUp={(event) => finishCarouselSwipe(aboutSwipe, event, showPreviousAboutSlide, showNextAboutSlide)}
+            onPointerCancel={() => cancelCarouselSwipe(aboutSwipe)}
+            onPointerLeave={() => cancelCarouselSwipe(aboutSwipe)}
+            onClickCapture={(event) => stopClickAfterSwipe(aboutSwipe, event)}
           >
             <div className="grid items-center gap-10 md:grid-cols-[0.85fr_1.15fr]">
               <div className="flex justify-center md:justify-start">
-                <div className="holo-static-border rounded-[22px] bg-white p-4">
+                <div className="about-photo-card holo-static-border w-full max-w-[19rem] rounded-[22px] bg-white p-3 sm:max-w-[23.5rem] sm:p-4 md:max-w-none">
                   <HoloPhotoCard
                     image={activeAboutSlide.image}
                     title={activeAboutSlide.imageTitle}
@@ -1124,7 +1179,7 @@ function App() {
                 ))}
               </div>
 
-              <div className="flex items-center justify-center gap-3 sm:justify-end">
+              <div className="hidden items-center justify-center gap-3 sm:justify-end md:flex">
                 <p className="mr-1 text-sm text-neutral-700">
                   {activeAboutIndex + 1} / {aboutSlides.length}
                 </p>
@@ -1154,7 +1209,7 @@ function App() {
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <SectionHeading title="Featured Projects" />
-            <div className="flex gap-3">
+            <div className="hidden gap-3 md:flex">
               <button
                 type="button"
                 onClick={showPreviousProject}
@@ -1176,9 +1231,17 @@ function App() {
             </div>
           </div>
 
-          <article className="holo-static-border mt-10 overflow-hidden rounded-lg bg-white" data-testid="featured-projects-carousel">
+          <article
+            className="holo-static-border mt-10 touch-pan-y overflow-hidden rounded-lg bg-white"
+            data-testid="featured-projects-carousel"
+            onPointerDown={(event) => startCarouselSwipe(projectSwipe, event)}
+            onPointerUp={(event) => finishCarouselSwipe(projectSwipe, event, showPreviousProject, showNextProject)}
+            onPointerCancel={() => cancelCarouselSwipe(projectSwipe)}
+            onPointerLeave={() => cancelCarouselSwipe(projectSwipe)}
+            onClickCapture={(event) => stopClickAfterSwipe(projectSwipe, event)}
+          >
             <div
-              className="relative min-h-[720px] bg-white sm:min-h-[660px] md:min-h-[430px]"
+              className="relative min-h-[980px] bg-white sm:min-h-[900px] md:min-h-[540px]"
               data-testid="project-card"
               data-project-index={activeProjectIndex}
               data-carousel-transition={projectTransition?.direction ?? 'idle'}
@@ -1188,23 +1251,8 @@ function App() {
                 className="absolute left-0 right-0 top-0 h-[320px] overflow-hidden bg-neutral-950 md:bottom-0 md:right-auto md:h-auto md:w-[57.5%]"
                 data-testid="project-gallery-region"
               >
-                <div className="absolute inset-0 bg-black" />
-                <Galaxy
-                  className="absolute inset-0 h-full w-full opacity-80"
-                  disableAnimation
-                  mouseInteraction={false}
-                  mouseRepulsion={false}
-                  twinkleIntensity={0}
-                  rotationSpeed={0}
-                  starSpeed={0.36}
-                  speed={0}
-                  density={1.08}
-                  hueShift={210}
-                  glowIntensity={0.38}
-                  saturation={0.55}
-                  transparent={false}
-                />
-                <div className="absolute inset-0 bg-[radial-gradient(circle_at_48%_42%,transparent,rgb(0_0_0_/_0.34)_62%,rgb(0_0_0_/_0.72)),linear-gradient(135deg,rgb(15_23_42_/_0.18),rgb(0_0_0_/_0.38))]" />
+                <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgb(255_255_255_/_0.16),transparent_26%),radial-gradient(circle_at_75%_22%,rgb(168_85_247_/_0.16),transparent_30%),radial-gradient(circle_at_52%_78%,rgb(45_212_191_/_0.12),transparent_34%),linear-gradient(135deg,rgb(12_10_18),rgb(18_22_30)_50%,rgb(10_10_14))]" />
+                <div className="absolute inset-0 bg-[linear-gradient(115deg,rgb(255_255_255_/_0.10),transparent_32%,rgb(255_255_255_/_0.08)_48%,transparent_68%),radial-gradient(circle_at_50%_45%,transparent,rgb(0_0_0_/_0.44)_74%)]" />
 
                 {projects.map((project, projectIndex) => {
                   const galleryLayerState = getProjectGalleryLayerState(projectIndex)
@@ -1232,13 +1280,22 @@ function App() {
 
       <section id="experience" className="scroll-mt-20 border-t border-neutral-900/10 px-5 py-20">
         <div className="mx-auto max-w-6xl">
-          <div className="holo-static-border rounded-lg bg-white p-6 md:p-8">
+          <div
+            className="holo-static-border touch-pan-y rounded-lg bg-white p-6 md:p-8"
+            data-testid="experience-carousel"
+            data-experience-index={activeExperienceCategoryIndex}
+            onPointerDown={(event) => startCarouselSwipe(experienceSwipe, event)}
+            onPointerUp={(event) => finishCarouselSwipe(experienceSwipe, event, showPreviousExperienceCategory, showNextExperienceCategory)}
+            onPointerCancel={() => cancelCarouselSwipe(experienceSwipe)}
+            onPointerLeave={() => cancelCarouselSwipe(experienceSwipe)}
+            onClickCapture={(event) => stopClickAfterSwipe(experienceSwipe, event)}
+          >
             <div className="flex flex-col gap-6 md:flex-row md:items-end md:justify-between">
               <div>
                 <SectionHeading title={activeExperienceCategory.label} />
               </div>
 
-              <div className="flex items-center gap-3">
+              <div className="hidden items-center gap-3 md:flex">
                 <button
                   type="button"
                   onClick={showPreviousExperienceCategory}
@@ -1333,25 +1390,10 @@ function App() {
         </div>
       </section>
 
-      <section id="skills" className="scroll-mt-20 border-t border-neutral-900/10 px-5 py-20">
-        <div className="mx-auto max-w-6xl">
-          <SectionHeading title="Skills" />
-          <div className="mt-10 flex flex-wrap gap-3">
-            {skills.map((skill) => (
-              <span key={skill} className="holo-skill-chip relative rounded-md px-4 py-2 text-neutral-900">
-                {skill}
-              </span>
-            ))}
-          </div>
-        </div>
-      </section>
-
       <section id="contact" className="scroll-mt-20 border-t border-neutral-900/10 px-5 py-20">
         <div className="mx-auto max-w-6xl">
           <SectionHeading title="Contact" />
-          <p className="mt-6 max-w-2xl text-xl leading-9 text-neutral-800">
-            Add your preferred email, LinkedIn, GitHub, and resume links here.
-          </p>
+          <p className="mt-3 text-sm font-bold lowercase tracking-[0.18em] text-neutral-700">click to flip!</p>
           <div className="mt-10 grid justify-center gap-5 sm:grid-cols-[repeat(3,minmax(0,14rem))] sm:items-center sm:gap-6">
             {contactMethods.map((method) => {
               const isFlipped = flippedContactMethodIds.includes(method.id)

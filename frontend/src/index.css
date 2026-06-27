@@ -53,6 +53,10 @@ body {
     inset 0 1px 0 rgb(255 255 255 / 0.95);
 }
 
+.about-photo-card .holo-card {
+  width: 100%;
+}
+
 .contact-flip-card {
   --contact-flip-rotate-y: 0deg;
   display: block;

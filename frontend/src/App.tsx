@@ -2,6 +2,8 @@ import { useCallback, useEffect, useRef, useState, type MouseEvent, type Mutable
 import { Check, ChevronDown, ChevronLeft, ChevronRight, Copy, Mail, X } from 'lucide-react'
 
 import HoloPhotoCard from './components/HoloPhotoCard'
+import ThemeToggle from './components/ThemeToggle'
+import { useTheme } from './hooks/useTheme'
 import bird4323 from './assets/birds/optimized/IMG_4323.jpg'
 import bird4330 from './assets/birds/optimized/IMG_4330.jpg'
 import bird4358 from './assets/birds/optimized/IMG_4358.jpg'
@@ -489,7 +491,7 @@ const polaroidPlacements = [
 function SectionHeading({ title }: { title: string }) {
   return (
     <div>
-      <h2 className="text-4xl font-bold tracking-tight text-neutral-950 md:text-5xl">{title}</h2>
+      <h2 className="text-4xl font-bold tracking-tight text-neutral-950 dark:text-night-bright md:text-5xl">{title}</h2>
     </div>
   )
 }
@@ -518,6 +520,7 @@ function ProjectPreviewArtwork({ preview, imageLoading }: { preview: ProjectPrev
 }
 
 function App() {
+  const { theme, toggleTheme } = useTheme()
   const [activeCardIndex, setActiveCardIndex] = useState(0)
   const [activeAboutIndex, setActiveAboutIndex] = useState(0)
   const [activeProjectIndex, setActiveProjectIndex] = useState(0)
@@ -991,23 +994,23 @@ function App() {
 
   const renderProjectText = (project: Project) => (
     <div
-      className={`absolute bottom-0 left-0 right-0 top-[320px] flex flex-col justify-start bg-white p-6 transition-opacity duration-150 ease-out md:left-[57.5%] md:top-0 md:justify-between md:p-8 ${
+      className={`absolute bottom-0 left-0 right-0 top-[320px] flex flex-col justify-start bg-white p-6 transition-opacity duration-150 ease-out md:left-[57.5%] md:top-0 md:justify-between md:p-8 dark:bg-night-panel ${
         isProjectTextVisible ? 'opacity-100' : 'opacity-0'
       }`}
       data-testid="project-copy"
       aria-live="polite"
     >
       <div>
-        <p className="text-sm uppercase tracking-[0.2em] text-neutral-700">{project.meta}</p>
-        <h3 className="mt-4 text-4xl font-bold tracking-tight text-neutral-950" data-testid="project-title">
+        <p className="text-sm uppercase tracking-[0.2em] text-neutral-700 dark:text-night-dim">{project.meta}</p>
+        <h3 className="mt-4 text-4xl font-bold tracking-tight text-neutral-950 dark:text-night-bright" data-testid="project-title">
           {project.title}
         </h3>
-        <p className="mt-3 text-sm font-bold text-neutral-800">{project.award}</p>
-        <p className="mt-6 text-lg leading-8 text-neutral-800">{project.copy}</p>
+        <p className="mt-3 text-sm font-bold text-neutral-800 dark:text-night-ink">{project.award}</p>
+        <p className="mt-6 text-lg leading-8 text-neutral-800 dark:text-night-ink">{project.copy}</p>
       </div>
 
       <div className="mt-6 md:mt-10">
-        <a href={project.githubUrl} className="holo-action relative inline-flex rounded-md px-4 py-3 font-bold text-neutral-950 transition">
+        <a href={project.githubUrl} className="holo-action relative inline-flex rounded-md px-4 py-3 font-bold text-neutral-950 dark:text-night-bright transition">
           Github
         </a>
       </div>
@@ -1015,18 +1018,22 @@ function App() {
   )
 
   return (
-    <main className="min-h-screen overflow-x-hidden bg-white text-neutral-900">
-      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-neutral-900/10 bg-white">
+    <main className="min-h-screen overflow-x-hidden bg-white text-neutral-900 dark:bg-transparent dark:text-night-ink">
+      <div className="night-sky" aria-hidden="true" />
+      <nav className="fixed left-0 right-0 top-0 z-50 border-b border-neutral-900/10 bg-white dark:border-night-edge dark:bg-night-panel">
         <div className="mx-auto flex max-w-6xl items-center justify-between gap-5 px-5 py-4">
-          <a href="#hero" className="text-lg font-bold tracking-tight text-neutral-950">
+          <a href="#hero" className="text-lg font-bold tracking-tight text-neutral-950 dark:text-night-bright">
             Chloe Houvardas
           </a>
-          <div className="hidden items-center gap-5 text-sm text-neutral-800 md:flex">
-            {navItems.map(([label, id]) => (
-              <a key={id} href={`#${id}`} className="transition hover:text-neutral-950">
-                {label}
-              </a>
-            ))}
+          <div className="flex items-center gap-4">
+            <div className="hidden items-center gap-5 text-sm text-neutral-800 md:flex dark:text-night-ink">
+              {navItems.map(([label, id]) => (
+                <a key={id} href={`#${id}`} className="transition hover:text-neutral-950 dark:hover:text-night-bright">
+                  {label}
+                </a>
+              ))}
+            </div>
+            <ThemeToggle theme={theme} onToggle={toggleTheme} />
           </div>
         </div>
       </nav>
@@ -1034,18 +1041,18 @@ function App() {
       <section id="hero" className="scroll-mt-20 overflow-x-hidden px-5 pt-32 pb-32 md:pt-40 md:pb-40">
         <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
           <div>
-            <p className="text-sm uppercase tracking-[0.35em] text-neutral-700">Software engineer and builder</p>
-            <h1 className="mt-5 max-w-3xl text-6xl font-bold tracking-tight text-neutral-950 md:text-8xl">
+            <p className="text-sm uppercase tracking-[0.35em] text-neutral-700 dark:text-night-dim">Software engineer and builder</p>
+            <h1 className="mt-5 max-w-3xl text-6xl font-bold tracking-tight text-neutral-950 dark:text-night-bright md:text-8xl">
               Chloe Houvardas
             </h1>
-            <p className="mt-7 max-w-2xl text-xl leading-9 text-neutral-800">
+            <p className="mt-7 max-w-2xl text-xl leading-9 text-neutral-800 dark:text-night-ink">
               Nice to meet you, welcome to my website! Feel free to scroll around and see what I've been up to lately :-)
             </p>
             <div className="mt-9 flex flex-wrap gap-3">
-              <a href="#featured-projects" className="holo-action relative rounded-md px-5 py-3 font-bold text-neutral-950 transition">
+              <a href="#featured-projects" className="holo-action relative rounded-md px-5 py-3 font-bold text-neutral-950 dark:text-night-bright transition">
                 View projects
               </a>
-              <a href="#contact" className="holo-action relative rounded-md px-5 py-3 font-bold text-neutral-950 transition">
+              <a href="#contact" className="holo-action relative rounded-md px-5 py-3 font-bold text-neutral-950 dark:text-night-bright transition">
                 Contact
               </a>
             </div>
@@ -1078,12 +1085,15 @@ function App() {
                     className={`absolute left-1/2 top-0 rounded-[22px] text-left transition duration-300 ease-out ${isActive ? 'z-30' : 'z-10 saturate-75 brightness-95'} ${placement}`}
                     aria-label={`Show ${card.title}`}
                   >
-                    <div className="holo-static-border rounded-[22px] bg-white p-4">
-                      <HoloPhotoCard image={card.image} title={card.title} variant={card.variant} rotateImage={card.rotateImage} loading={isActive ? 'eager' : 'lazy'} />
-                      <div className="px-2 pb-1 pt-5 text-center">
-                        <p className="text-2xl font-bold tracking-tight text-neutral-950">{card.title}</p>
-                        <p className="mt-1 text-lg text-neutral-700">{card.subtitle}</p>
-                      </div>
+                    <div className="holo-static-border rounded-[22px] bg-white p-3">
+                      <HoloPhotoCard
+                        image={card.image}
+                        title={card.title}
+                        subtitle={card.subtitle}
+                        variant={card.variant}
+                        rotateImage={card.rotateImage}
+                        loading={isActive ? 'eager' : 'lazy'}
+                      />
                     </div>
                   </button>
                 )
@@ -1127,7 +1137,7 @@ function App() {
         </div>
       </section>
 
-      <section id="about" className="scroll-mt-20 border-t border-neutral-900/10 px-5 py-20">
+      <section id="about" className="scroll-mt-20 border-t border-neutral-900/10 dark:border-night-edge px-5 py-20">
         <div className="mx-auto max-w-6xl">
           <SectionHeading title="About" />
           <article
@@ -1145,18 +1155,15 @@ function App() {
                 <div className="about-photo-card holo-static-border w-full max-w-[19rem] rounded-[22px] bg-white p-3 sm:max-w-[23.5rem] sm:p-4 md:max-w-none">
                   <HoloPhotoCard
                     image={activeAboutSlide.image}
-                    title={activeAboutSlide.imageTitle}
+                    title={activeAboutSlide.cardTitle}
+                    subtitle={activeAboutSlide.cardSubtitle}
                     variant={activeAboutSlide.variant}
                     crop={activeAboutSlide.crop}
                     loading="lazy"
                   />
-                  <div className="px-2 pb-1 pt-5 text-center">
-                    <p className="text-2xl font-bold tracking-tight text-neutral-950">{activeAboutSlide.cardTitle}</p>
-                    <p className="mt-1 text-lg text-neutral-700">{activeAboutSlide.cardSubtitle}</p>
-                  </div>
                 </div>
               </div>
-              <div className="text-xl leading-9 text-neutral-900" aria-live="polite">
+              <div className="text-xl leading-9 text-neutral-900 dark:text-night-ink" aria-live="polite">
                 {activeAboutSlide.paragraphs.map((paragraph, index) => (
                   <p key={paragraph} className={index === 0 ? undefined : 'mt-6'}>
                     {paragraph}
@@ -1165,14 +1172,14 @@ function App() {
               </div>
             </div>
 
-            <div className="mt-8 flex flex-col gap-5 border-t border-neutral-900/10 pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="mt-8 flex flex-col gap-5 border-t border-neutral-900/10 dark:border-night-edge pt-5 sm:flex-row sm:items-center sm:justify-between">
               <div className="flex items-center justify-center gap-3 sm:justify-start">
                 {aboutSlides.map((slide, index) => (
                   <button
                     key={slide.cardTitle}
                     type="button"
                     onClick={() => setActiveAboutIndex(index)}
-                    className={`h-2.5 rounded-full transition ${activeAboutIndex === index ? 'w-8 bg-neutral-950' : 'w-2.5 bg-neutral-300 hover:bg-neutral-500'}`}
+                    className={`h-2.5 rounded-full transition ${activeAboutIndex === index ? 'w-8 bg-neutral-950 dark:bg-night-bright' : 'w-2.5 bg-neutral-300 hover:bg-neutral-500 dark:bg-neutral-600 dark:hover:bg-neutral-400'}`}
                     aria-label={`Show ${slide.cardTitle}`}
                     aria-current={activeAboutIndex === index ? 'true' : undefined}
                   />
@@ -1180,7 +1187,7 @@ function App() {
               </div>
 
               <div className="hidden items-center justify-center gap-3 sm:justify-end md:flex">
-                <p className="mr-1 text-sm text-neutral-700">
+                <p className="mr-1 text-sm text-neutral-700 dark:text-night-dim">
                   {activeAboutIndex + 1} / {aboutSlides.length}
                 </p>
                 <button
@@ -1205,7 +1212,7 @@ function App() {
         </div>
       </section>
 
-      <section id="featured-projects" className="scroll-mt-20 border-t border-neutral-900/10 px-5 py-20">
+      <section id="featured-projects" className="scroll-mt-20 border-t border-neutral-900/10 dark:border-night-edge px-5 py-20">
         <div className="mx-auto max-w-6xl">
           <div className="flex flex-col gap-5 md:flex-row md:items-end md:justify-between">
             <SectionHeading title="Featured Projects" />
@@ -1241,7 +1248,7 @@ function App() {
             onClickCapture={(event) => stopClickAfterSwipe(projectSwipe, event)}
           >
             <div
-              className="relative min-h-[980px] bg-white sm:min-h-[900px] md:min-h-[540px]"
+              className="relative min-h-[980px] bg-white sm:min-h-[900px] md:min-h-[540px] dark:bg-night-panel"
               data-testid="project-card"
               data-project-index={activeProjectIndex}
               data-carousel-transition={projectTransition?.direction ?? 'idle'}
@@ -1272,13 +1279,13 @@ function App() {
             </div>
           </article>
 
-          <div className="mt-4 text-sm text-neutral-700" data-testid="project-counter">
+          <div className="mt-4 text-sm text-neutral-700 dark:text-night-dim" data-testid="project-counter">
             {activeProjectIndex + 1} / {projects.length}
           </div>
         </div>
       </section>
 
-      <section id="experience" className="scroll-mt-20 border-t border-neutral-900/10 px-5 py-20">
+      <section id="experience" className="scroll-mt-20 border-t border-neutral-900/10 dark:border-night-edge px-5 py-20">
         <div className="mx-auto max-w-6xl">
           <div
             className="holo-static-border touch-pan-y rounded-lg bg-white p-6 md:p-8"
@@ -1299,18 +1306,18 @@ function App() {
                 <button
                   type="button"
                   onClick={showPreviousExperienceCategory}
-                  className="holo-icon-button relative flex h-11 w-11 items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2"
+                  className="holo-icon-button relative flex h-11 w-11 items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-neutral-950 dark:focus:ring-night-bright dark:focus:ring-offset-night-panel focus:ring-offset-2"
                   aria-label="Previous experience category"
                 >
                   <ChevronLeft size={24} strokeWidth={2.4} />
                 </button>
-                <p className="min-w-12 text-center text-sm text-neutral-700">
+                <p className="min-w-12 text-center text-sm text-neutral-700 dark:text-night-dim">
                   {activeExperienceCategoryIndex + 1} / {experienceCategories.length}
                 </p>
                 <button
                   type="button"
                   onClick={showNextExperienceCategory}
-                  className="holo-icon-button relative flex h-11 w-11 items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2"
+                  className="holo-icon-button relative flex h-11 w-11 items-center justify-center rounded-full transition focus:outline-none focus:ring-2 focus:ring-neutral-950 dark:focus:ring-night-bright dark:focus:ring-offset-night-panel focus:ring-offset-2"
                   aria-label="Next experience category"
                 >
                   <ChevronRight size={24} strokeWidth={2.4} />
@@ -1324,7 +1331,7 @@ function App() {
                   key={category.label}
                   type="button"
                   onClick={() => setActiveExperienceCategoryIndex(index)}
-                  className="holo-action relative rounded-md px-4 py-2 font-bold text-neutral-950 transition focus:outline-none focus:ring-2 focus:ring-neutral-950 focus:ring-offset-2"
+                  className="holo-action relative rounded-md px-4 py-2 font-bold text-neutral-950 dark:text-night-bright transition focus:outline-none focus:ring-2 focus:ring-neutral-950 dark:focus:ring-night-bright dark:focus:ring-offset-night-panel focus:ring-offset-2"
                   role="tab"
                   aria-selected={activeExperienceCategoryIndex === index}
                 >
@@ -1337,15 +1344,15 @@ function App() {
               <div className="mt-10 grid gap-6 md:grid-cols-2" aria-live="polite" data-testid="experience-awards-grid">
                 {activeExperienceCategory.items.map((item) => (
                   <article key={`${activeExperienceCategory.label}-${item.title}`} className="holo-static-border rounded-lg bg-white p-5">
-                    <p className="text-sm text-neutral-700">{item.meta}</p>
-                    <h3 className="mt-2 text-2xl font-bold text-neutral-950">{item.title}</h3>
-                    {item.copy ? <p className="mt-4 leading-7 text-neutral-800">{item.copy}</p> : null}
+                    <p className="text-sm text-neutral-700 dark:text-night-dim">{item.meta}</p>
+                    <h3 className="mt-2 text-2xl font-bold text-neutral-950 dark:text-night-bright">{item.title}</h3>
+                    {item.copy ? <p className="mt-4 leading-7 text-neutral-800 dark:text-night-ink">{item.copy}</p> : null}
                   </article>
                 ))}
               </div>
             ) : (
               <div className="relative mt-10" aria-live="polite" data-testid="experience-timeline">
-                <div className="absolute bottom-5 left-[1.35rem] top-5 w-px bg-neutral-900/20 md:left-1/2 md:-translate-x-1/2" aria-hidden="true" />
+                <div className="absolute bottom-5 left-[1.35rem] top-5 w-px bg-neutral-900/20 md:left-1/2 md:-translate-x-1/2 dark:bg-white/20" aria-hidden="true" />
                 <div className="grid gap-6">
                   {activeExperienceCategory.items.map((item, index) => {
                     const isLeftAligned = index % 2 === 0
@@ -1358,24 +1365,24 @@ function App() {
                           }`}
                         >
                           <article className="holo-static-border rounded-lg bg-white p-5">
-                            <p className="text-sm text-neutral-700">{item.meta}</p>
-                            <h3 className="mt-2 text-2xl font-bold text-neutral-950">{item.title}</h3>
+                            <p className="text-sm text-neutral-700 dark:text-night-dim">{item.meta}</p>
+                            <h3 className="mt-2 text-2xl font-bold text-neutral-950 dark:text-night-bright">{item.title}</h3>
                             {item.roles ? (
                               <div className="mt-4 grid gap-3 text-left">
                                 {item.roles.map((role) => (
-                                  <div key={`${role.title}-${role.dates}`} className="rounded-md border border-neutral-900/10 bg-white/90 px-4 py-3 shadow-sm">
-                                    <p className="text-lg font-bold leading-tight text-neutral-950">{role.title}</p>
-                                    <p className="mt-1 text-sm leading-6 text-neutral-700">{role.dates}</p>
+                                  <div key={`${role.title}-${role.dates}`} className="rounded-md border border-neutral-900/10 bg-white/90 px-4 py-3 shadow-sm dark:border-night-edge dark:bg-white/5">
+                                    <p className="text-lg font-bold leading-tight text-neutral-950 dark:text-night-bright">{role.title}</p>
+                                    <p className="mt-1 text-sm leading-6 text-neutral-700 dark:text-night-dim">{role.dates}</p>
                                   </div>
                                 ))}
                               </div>
                             ) : item.copy ? (
-                              <p className="mt-4 leading-7 text-neutral-800">{item.copy}</p>
+                              <p className="mt-4 leading-7 text-neutral-800 dark:text-night-ink">{item.copy}</p>
                             ) : null}
                           </article>
                         </div>
 
-                        <div className="holo-static-border absolute left-0 top-3 flex h-11 w-11 items-center justify-center rounded-full text-neutral-950 md:static md:col-start-2 md:row-start-1 md:mx-auto">
+                        <div className="holo-static-border absolute left-0 top-3 flex h-11 w-11 items-center justify-center rounded-full text-neutral-950 dark:text-night-bright md:static md:col-start-2 md:row-start-1 md:mx-auto">
                           <ChevronDown size={22} strokeWidth={2.4} aria-hidden="true" />
                         </div>
 
@@ -1390,10 +1397,10 @@ function App() {
         </div>
       </section>
 
-      <section id="contact" className="scroll-mt-20 border-t border-neutral-900/10 px-5 py-20">
+      <section id="contact" className="scroll-mt-20 border-t border-neutral-900/10 dark:border-night-edge px-5 py-20">
         <div className="mx-auto max-w-6xl">
           <SectionHeading title="Contact" />
-          <p className="mt-3 text-sm font-bold lowercase tracking-[0.18em] text-neutral-700">click to flip!</p>
+          <p className="mt-3 text-sm font-bold lowercase tracking-[0.18em] text-neutral-700 dark:text-night-dim">click to flip!</p>
           <div className="mt-10 grid justify-center gap-5 sm:grid-cols-[repeat(3,minmax(0,14rem))] sm:items-center sm:gap-6">
             {contactMethods.map((method) => {
               const isFlipped = flippedContactMethodIds.includes(method.id)

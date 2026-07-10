@@ -1,5 +1,16 @@
 @import "tailwindcss";
 
+@custom-variant dark (&:where([data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --color-night: hsl(230 42% 7%);
+  --color-night-panel: hsl(230 34% 12%);
+  --color-night-ink: hsl(228 30% 88%);
+  --color-night-bright: hsl(220 40% 97%);
+  --color-night-dim: hsl(228 16% 66%);
+  --color-night-edge: hsl(0 0% 100% / 0.14);
+}
+
 :root {
   color-scheme: light;
   background: white;
@@ -23,6 +34,101 @@ body {
 #root {
   min-height: 100%;
   background: white;
+}
+
+html[data-theme='dark'] {
+  color-scheme: dark;
+  background: var(--color-night);
+}
+
+[data-theme='dark'] body,
+[data-theme='dark'] #root {
+  background: transparent;
+}
+
+.night-sky {
+  position: fixed;
+  inset: 0;
+  z-index: -1;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 500ms ease;
+  background-color: var(--color-night);
+  background-image:
+    radial-gradient(1px 1px at 25px 35px, hsl(0 0% 100% / 0.9) 50%, transparent 51%),
+    radial-gradient(1px 1px at 118px 92px, hsl(210 80% 90% / 0.7) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 66px 151px, hsl(0 0% 100% / 0.65) 50%, transparent 51%),
+    radial-gradient(1px 1px at 179px 44px, hsl(48 90% 88% / 0.55) 50%, transparent 51%),
+    radial-gradient(1px 1px at 152px 172px, hsl(0 0% 100% / 0.45) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 41px 205px, hsl(210 90% 92% / 0.5) 50%, transparent 51%),
+    radial-gradient(1px 1px at 231px 122px, hsl(0 0% 100% / 0.6) 50%, transparent 51%),
+    radial-gradient(52rem 32rem at 78% -4%, hsl(258 62% 30% / 0.34), transparent 70%),
+    radial-gradient(44rem 30rem at 8% 42%, hsl(216 70% 30% / 0.26), transparent 70%),
+    radial-gradient(40rem 26rem at 88% 88%, hsl(286 55% 26% / 0.22), transparent 70%);
+  background-size:
+    260px 260px,
+    260px 260px,
+    260px 260px,
+    260px 260px,
+    260px 260px,
+    260px 260px,
+    260px 260px,
+    100% 100%,
+    100% 100%,
+    100% 100%;
+}
+
+.night-sky::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background-image:
+    radial-gradient(1px 1px at 84px 24px, hsl(0 0% 100% / 0.8) 50%, transparent 51%),
+    radial-gradient(1.5px 1.5px at 203px 188px, hsl(200 90% 92% / 0.7) 50%, transparent 51%),
+    radial-gradient(1px 1px at 12px 132px, hsl(0 0% 100% / 0.55) 50%, transparent 51%);
+  background-size: 320px 320px;
+}
+
+[data-theme='dark'] .night-sky {
+  opacity: 1;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .night-sky::after {
+    animation: night-sky-twinkle 5.5s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes night-sky-twinkle {
+  from {
+    opacity: 0.35;
+  }
+
+  to {
+    opacity: 1;
+  }
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation: none;
+  mix-blend-mode: normal;
+}
+
+::view-transition-old(root) {
+  z-index: 1;
+}
+
+::view-transition-new(root) {
+  z-index: 2;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-group(root),
+  ::view-transition-old(root),
+  ::view-transition-new(root) {
+    animation: none !important;
+  }
 }
 
 .holo-static-border {
@@ -536,6 +642,96 @@ body {
 
 .holo-action[aria-selected='true']::after {
   background: rgb(255 255 255 / 0.96);
+}
+
+[data-theme='dark'] .holo-static-border {
+  --static-holo-ink: hsl(224 20% 62%);
+  background:
+    linear-gradient(var(--color-night-panel), var(--color-night-panel)) padding-box,
+    repeating-linear-gradient(
+      132deg,
+      var(--static-holo-ink) 0%,
+      var(--static-holo-1) 5%,
+      var(--static-holo-2) 9%,
+      var(--static-holo-ink) 13%,
+      var(--static-holo-4) 18%,
+      var(--static-holo-5) 23%,
+      var(--static-holo-6) 28%,
+      var(--static-holo-3) 34%,
+      var(--static-holo-ink) 40%
+    ) border-box;
+  box-shadow:
+    0 16px 34px rgb(0 0 0 / 0.5),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+[data-theme='dark'] .contact-flip-card__toggle,
+[data-theme='dark'] .contact-flip-card__icon,
+[data-theme='dark'] .holo-action--dark,
+[data-theme='dark'] .holo-icon-button {
+  color: var(--color-night-bright);
+}
+
+[data-theme='dark'] .holo-skill-chip {
+  color: var(--color-night-ink);
+}
+
+[data-theme='dark'] .contact-flip-card__icon {
+  filter: none;
+}
+
+[data-theme='dark'] .contact-flip-card__icon--front {
+  filter: drop-shadow(0 16px 28px rgb(0 0 0 / 0.5));
+}
+
+[data-theme='dark'] .contact-flip-card__face,
+[data-theme='dark'] .contact-flip-card__copy,
+[data-theme='dark'] .holo-action,
+[data-theme='dark'] .holo-icon-button,
+[data-theme='dark'] .holo-skill-chip {
+  border-color: rgb(255 255 255 / 0.16);
+  box-shadow:
+    0 10px 24px rgb(0 0 0 / 0.45),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+[data-theme='dark'] .contact-flip-card:hover .contact-flip-card__face,
+[data-theme='dark'] .contact-flip-card__toggle:focus-visible .contact-flip-card__face,
+[data-theme='dark'] .contact-flip-card__copy:hover,
+[data-theme='dark'] .contact-flip-card__copy:focus-visible,
+[data-theme='dark'] .holo-action:hover,
+[data-theme='dark'] .holo-action:focus-visible,
+[data-theme='dark'] .holo-icon-button:not(:disabled):hover,
+[data-theme='dark'] .holo-icon-button:not(:disabled):focus-visible {
+  box-shadow:
+    0 16px 30px rgb(0 0 0 / 0.55),
+    inset 0 1px 0 rgb(255 255 255 / 0.08);
+}
+
+[data-theme='dark'] .contact-flip-card__face::after,
+[data-theme='dark'] .contact-flip-card__copy::after,
+[data-theme='dark'] .holo-action::after,
+[data-theme='dark'] .holo-icon-button::after,
+[data-theme='dark'] .holo-skill-chip::after {
+  border-color: rgb(255 255 255 / 0.12);
+  background: hsl(230 34% 13% / 0.97);
+}
+
+[data-theme='dark'] .contact-flip-card__copy[data-copied='true']::after {
+  background: hsl(230 34% 13% / 0.88);
+}
+
+[data-theme='dark'] .holo-action[aria-selected='true']::after {
+  background: hsl(230 34% 13% / 0.92);
+}
+
+[data-theme='dark'] .contact-flip-card__toggle:focus-visible .contact-flip-card__face,
+[data-theme='dark'] .contact-flip-card__copy:focus-visible {
+  outline-color: var(--color-night-bright);
+}
+
+[data-theme='dark'] .contact-flip-card__copy-icon {
+  filter: none;
 }
 
 @media (prefers-reduced-motion: reduce) {

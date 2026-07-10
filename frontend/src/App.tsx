@@ -844,6 +844,14 @@ function App() {
     void showProject('next')
   }
 
+  const showProjectAtIndex = (index: number) => {
+    if (index === activeProjectIndex) {
+      return
+    }
+
+    void showProject(index > activeProjectIndex ? 'next' : 'previous')
+  }
+
   const showPreviousExperienceCategory = () => {
     setActiveExperienceCategoryIndex((currentIndex) => (currentIndex - 1 + experienceCategories.length) % experienceCategories.length)
   }
@@ -994,7 +1002,7 @@ function App() {
 
   const renderProjectText = (project: Project) => (
     <div
-      className={`absolute bottom-0 left-0 right-0 top-[320px] flex flex-col justify-start bg-white p-6 transition-opacity duration-150 ease-out md:left-[57.5%] md:top-0 md:justify-between md:p-8 dark:bg-night-panel ${
+      className={`flex flex-col justify-start bg-white p-6 transition-opacity duration-150 ease-out lg:absolute lg:inset-y-0 lg:left-[57.5%] lg:right-0 lg:justify-between lg:p-8 dark:bg-night-panel ${
         isProjectTextVisible ? 'opacity-100' : 'opacity-0'
       }`}
       data-testid="project-copy"
@@ -1039,10 +1047,10 @@ function App() {
       </nav>
 
       <section id="hero" className="scroll-mt-20 overflow-x-hidden px-5 pt-32 pb-32 md:pt-40 md:pb-40">
-        <div className="mx-auto grid max-w-6xl items-center gap-12 md:grid-cols-[1.1fr_0.9fr]">
+        <div className="mx-auto grid max-w-6xl items-center gap-12 lg:grid-cols-[1.1fr_0.9fr]">
           <div>
             <p className="text-sm uppercase tracking-[0.35em] text-neutral-700 dark:text-night-dim">Software engineer and builder</p>
-            <h1 className="mt-5 max-w-3xl text-6xl font-bold tracking-tight text-neutral-950 dark:text-night-bright md:text-8xl">
+            <h1 className="mt-5 max-w-3xl text-6xl font-bold tracking-tight text-neutral-950 dark:text-night-bright sm:text-7xl lg:text-8xl">
               Chloe Houvardas
             </h1>
             <p className="mt-7 max-w-2xl text-xl leading-9 text-neutral-800 dark:text-night-ink">
@@ -1058,7 +1066,7 @@ function App() {
             </div>
           </div>
           <div
-            className="relative mx-auto h-[470px] w-full max-w-[700px] touch-pan-y sm:h-[520px] md:mx-0 md:ml-auto md:h-[560px]"
+            className="relative mx-auto h-[470px] w-full max-w-[700px] touch-pan-y sm:h-[520px] lg:mx-0 lg:ml-auto lg:h-[560px]"
             data-testid="bird-card-carousel"
             data-active-card-index={activeCardIndex}
             onPointerDown={(event) => startCarouselSwipe(holoCardsSwipe, event)}
@@ -1248,14 +1256,14 @@ function App() {
             onClickCapture={(event) => stopClickAfterSwipe(projectSwipe, event)}
           >
             <div
-              className="relative min-h-[980px] bg-white sm:min-h-[900px] md:min-h-[540px] dark:bg-night-panel"
+              className="relative bg-white lg:min-h-[540px] dark:bg-night-panel"
               data-testid="project-card"
               data-project-index={activeProjectIndex}
               data-carousel-transition={projectTransition?.direction ?? 'idle'}
               data-image-decode-pending={isProjectImageDecodePending ? 'true' : 'false'}
             >
               <div
-                className="absolute left-0 right-0 top-0 h-[320px] overflow-hidden bg-neutral-950 md:bottom-0 md:right-auto md:h-auto md:w-[57.5%]"
+                className="relative h-[320px] overflow-hidden bg-neutral-950 lg:absolute lg:inset-y-0 lg:left-0 lg:right-auto lg:h-auto lg:w-[57.5%]"
                 data-testid="project-gallery-region"
               >
                 <div className="absolute inset-0 bg-[radial-gradient(circle_at_20%_18%,rgb(255_255_255_/_0.16),transparent_26%),radial-gradient(circle_at_75%_22%,rgb(168_85_247_/_0.16),transparent_30%),radial-gradient(circle_at_52%_78%,rgb(45_212_191_/_0.12),transparent_34%),linear-gradient(135deg,rgb(12_10_18),rgb(18_22_30)_50%,rgb(10_10_14))]" />
@@ -1279,8 +1287,23 @@ function App() {
             </div>
           </article>
 
-          <div className="mt-4 text-sm text-neutral-700 dark:text-night-dim" data-testid="project-counter">
-            {activeProjectIndex + 1} / {projects.length}
+          <div className="mt-4 flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 md:hidden" role="tablist" aria-label="Featured projects">
+              {projects.map((project, index) => (
+                <button
+                  key={project.title}
+                  type="button"
+                  onClick={() => showProjectAtIndex(index)}
+                  disabled={isProjectCarouselBusy}
+                  className={`h-2.5 rounded-full transition disabled:cursor-default ${activeProjectIndex === index ? 'w-8 bg-neutral-950 dark:bg-night-bright' : 'w-2.5 bg-neutral-300 hover:bg-neutral-500 dark:bg-neutral-600 dark:hover:bg-neutral-400'}`}
+                  aria-label={`Show ${project.title}`}
+                  aria-current={activeProjectIndex === index ? 'true' : undefined}
+                />
+              ))}
+            </div>
+            <p className="text-sm text-neutral-700 dark:text-night-dim" data-testid="project-counter">
+              {activeProjectIndex + 1} / {projects.length}
+            </p>
           </div>
         </div>
       </section>

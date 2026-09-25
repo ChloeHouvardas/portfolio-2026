@@ -177,7 +177,9 @@ export default function PortfolioPage() {
             <section
               ref={cardRef}
               className={
-                section.id === 'about' ? 'portfolio-card portfolio-card--wide' : 'portfolio-card'
+                section.id === 'about' || section.id === 'skills'
+                  ? 'portfolio-card portfolio-card--wide'
+                  : 'portfolio-card'
               }
               tabIndex={-1}
               aria-labelledby="portfolio-card-title"

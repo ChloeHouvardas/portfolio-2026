@@ -3,6 +3,7 @@ import EmailButton from './EmailButton'
 import ProjectsBody from './ProjectsBody'
 import queensCrest from './media/queens-crest.svg'
 import koreaUniversitySymbol from './media/korea-university-symbol.svg'
+import SkillsBody from './SkillsBody'
 
 export type SectionId = 'about' | 'projects' | 'skills' | 'contact'
 
@@ -14,19 +15,6 @@ export interface Section {
 }
 
 export const TAGLINE = 'Hey! Welcome to my little corner of the sky :-)'
-
-const SKILLS = [
-  'TypeScript',
-  'React',
-  'three.js',
-  'GLSL',
-  'Canvas 2D',
-  'CSS',
-  'Vite',
-  'Playwright',
-  'Node.js',
-  'pnpm',
-]
 
 const ARTICLES = [
   {
@@ -207,18 +195,7 @@ export const SECTIONS: Section[] = [
     id: 'skills',
     label: 'Skills',
     title: 'Skills',
-    body: (
-      <>
-        <p>Tools I reach for, from shader to test suite:</p>
-        <ul className="portfolio-skills">
-          {SKILLS.map((skill) => (
-            <li key={skill} className="portfolio-chip">
-              {skill}
-            </li>
-          ))}
-        </ul>
-      </>
-    ),
+    body: <SkillsBody />,
   },
   {
     id: 'contact',

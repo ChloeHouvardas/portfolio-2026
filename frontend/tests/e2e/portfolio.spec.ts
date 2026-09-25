@@ -114,3 +114,26 @@ test('projects section lists Devpost projects and flags winners', async ({ page 
 
   expect(errors).toEqual([])
 })
+
+test('skills section shows resume skills as icons with a pausable ticker', async ({ page }) => {
+  const errors = collectErrors(page)
+
+  await page.goto('/')
+  await page.getByRole('button', { name: 'Skills' }).click()
+  await expect(page.getByRole('heading', { name: 'Skills' })).toBeVisible()
+
+  for (const group of ['Languages', 'Frameworks & AI/ML', 'Cloud, Data & Tools']) {
+    await expect(page.getByRole('region', { name: group })).toBeVisible()
+  }
+  await expect(page.locator('.portfolio-skill')).toHaveCount(27)
+  await expect(page.locator('.portfolio-skill', { hasText: 'GitHub Actions' })).toBeVisible()
+
+  // The decorative ticker pauses from the keyboard as well as by tap.
+  const pause = page.getByRole('button', { name: 'Pause logo ticker' })
+  await pause.focus()
+  await page.keyboard.press('Enter')
+  await expect(page.getByRole('button', { name: 'Play logo ticker' })).toHaveAttribute('aria-pressed', 'true')
+  await expect(page.locator('.portfolio-marquee')).toHaveAttribute('data-paused', 'true')
+
+  expect(errors).toEqual([])
+})

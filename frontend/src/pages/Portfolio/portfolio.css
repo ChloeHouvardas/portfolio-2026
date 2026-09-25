@@ -683,28 +683,167 @@ main.portfolio-content {
   border-radius: 4px;
 }
 
-/* Skills — quiet hairline chips */
+/* Skills — a drifting logo ticker over three spec-sheet tiles of
+   home-screen icons. Icons are interior glass (no lens); the grid springs
+   in once when the card opens. */
 
-.portfolio-skills {
-  list-style: none;
-  margin: 0;
-  padding: 0;
+.portfolio-skills-intro {
   display: flex;
-  flex-wrap: wrap;
-  gap: 0.45rem;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
 }
 
-.portfolio-chip {
-  padding: 0.42rem 0.95rem;
+.portfolio-card-body .portfolio-skills-intro p {
+  margin: 0;
+}
+
+.portfolio-marquee-toggle {
+  position: relative;
+  flex: none;
+  display: grid;
+  place-items: center;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
   border: 1px solid var(--hairline);
-  border-radius: 999px;
+  border-radius: 9999px;
   background: rgba(255, 255, 255, 0.42);
   background-image: var(--sheen-soft);
   box-shadow: var(--rim-soft);
-  font-size: 0.875rem;
-  font-weight: 400;
-  letter-spacing: -0.016em;
+  color: var(--ink-secondary);
+  cursor: pointer;
+}
+
+/* 44px touch target around the 32px glyph. */
+.portfolio-marquee-toggle::after {
+  content: '';
+  position: absolute;
+  inset: -6px;
+}
+
+.portfolio-marquee-toggle svg {
+  width: 0.8rem;
+  height: 0.8rem;
+  fill: currentColor;
+}
+
+.portfolio-marquee-toggle:hover {
+  background-color: rgba(255, 255, 255, 0.58);
+}
+
+.portfolio-marquee-toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.portfolio-marquee {
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  margin: 0.9rem -1.5rem 1.1rem;
+  overflow: hidden;
+  /* Chips dissolve into the card at both edges. */
+  -webkit-mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+  mask-image: linear-gradient(90deg, transparent, #000 12%, #000 88%, transparent);
+}
+
+.portfolio-marquee-track {
+  display: flex;
+  gap: 0.5rem;
+  width: max-content;
+  padding-right: 0.5rem; /* matches gap so the loop seam is invisible */
+}
+
+.portfolio-marquee-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  padding: 0.36rem 0.8rem 0.36rem 0.6rem;
+  border: 1px solid var(--hairline);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.42);
+  background-image: var(--sheen-soft);
+  box-shadow: var(--rim-soft);
+  font-size: 0.8125rem;
+  letter-spacing: -0.01em;
+  white-space: nowrap;
   color: var(--ink);
+}
+
+.portfolio-marquee-chip svg {
+  width: 1rem;
+  height: 1rem;
+  flex: none;
+}
+
+.portfolio-skill-groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.portfolio-skill-groups .portfolio-widget {
+  padding: 1rem 0.5rem 0.9rem;
+}
+
+.portfolio-skill-groups .portfolio-widget-label {
+  padding-left: 0.5rem;
+}
+
+.portfolio-skill-grid {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(3.75rem, 1fr));
+  row-gap: 0.85rem;
+  column-gap: 0.25rem;
+}
+
+.portfolio-skill {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+/* App icon: a white glass squircle (iOS corner ≈ 22.5% of the edge). */
+.portfolio-skill-icon {
+  display: grid;
+  place-items: center;
+  width: 3.25rem;
+  height: 3.25rem;
+  border: 1px solid var(--hairline);
+  border-radius: 0.75rem;
+  background: rgba(255, 255, 255, 0.72);
+  background-image: var(--sheen-soft);
+  box-shadow: var(--rim-soft), 0 2px 8px rgba(0, 0, 0, 0.06);
+}
+
+.portfolio-skill-icon svg {
+  width: 1.75rem;
+  height: 1.75rem;
+}
+
+.portfolio-skill-name {
+  max-width: 100%;
+  font-size: 0.6875rem;
+  line-height: 1.25;
+  letter-spacing: 0.005em;
+  text-align: center;
+  color: var(--ink-secondary);
+}
+
+@media (min-width: 640px) {
+  .portfolio-skill-groups .portfolio-widget {
+    padding: 1.1rem 1rem 1rem;
+  }
+  .portfolio-skill-grid {
+    /* Wide card fits eleven across, so each group sits on one line. */
+    grid-template-columns: repeat(auto-fill, minmax(4.25rem, 1fr));
+  }
 }
 
 /* Contact — same interior control glass as project rows and chips;
@@ -851,6 +990,23 @@ button.portfolio-contact {
   }
 }
 
+@keyframes portfolio-marquee {
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+@keyframes portfolio-icon-in {
+  from {
+    opacity: 0;
+    transform: translateY(10px) scale(0.6);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+
 @media (prefers-reduced-motion: no-preference) {
   @keyframes portfolio-card-in {
     from {
@@ -877,6 +1033,30 @@ button.portfolio-contact {
     transform: scale(0.95); /* Apple's system-wide press */
   }
 
+  /* Logo ticker: each track holds two copies, so -50% loops seamlessly. */
+  .portfolio-marquee-track {
+    animation: portfolio-marquee 48s linear infinite;
+  }
+  .portfolio-marquee-track--reverse {
+    animation-direction: reverse;
+    animation-duration: 56s;
+  }
+  .portfolio-marquee[data-paused='true'] .portfolio-marquee-track {
+    animation-play-state: paused;
+  }
+
+  /* Home-screen spring: icons pop in one after another. */
+  .portfolio-skill {
+    animation: portfolio-icon-in 0.55s cubic-bezier(0.34, 1.45, 0.64, 1) both;
+    animation-delay: calc(0.12s + var(--i, 0) * 28ms);
+  }
+  .portfolio-skill-icon {
+    transition: transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+  .portfolio-skill:active .portfolio-skill-icon {
+    transform: scale(0.92);
+  }
+
   .portfolio-project-details {
     transition: grid-template-rows 0.3s ease;
   }
@@ -896,6 +1076,9 @@ button.portfolio-contact {
 
 /* Without motion, the chevron still signals state. */
 @media (prefers-reduced-motion: reduce) {
+  .portfolio-marquee-toggle {
+    display: none; /* the ticker is already still */
+  }
   .portfolio-project--open .portfolio-project-chevron {
     transform: rotate(90deg);
   }

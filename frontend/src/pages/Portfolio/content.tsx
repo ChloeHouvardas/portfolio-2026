@@ -1,6 +1,8 @@
 import type { ReactNode } from 'react'
 import EmailButton from './EmailButton'
 import ProjectsBody from './ProjectsBody'
+import queensCrest from './media/queens-crest.svg'
+import koreaUniversitySymbol from './media/korea-university-symbol.svg'
 
 export type SectionId = 'about' | 'projects' | 'skills' | 'contact'
 
@@ -26,6 +28,29 @@ const SKILLS = [
   'pnpm',
 ]
 
+const ARTICLES = [
+  {
+    title: 'Finding success far from home',
+    source: 'Queen’s Faculty of Arts and Science',
+    href: 'https://www.queensu.ca/artsci/news/finding-success-far-from-home',
+  },
+  {
+    title: 'ICS students win 2024 GenAI Hackathon',
+    source: 'UC Irvine ICS',
+    href: 'https://ics.uci.edu/2024/07/31/ics-students-win-2024-genai-hackathon/',
+  },
+  {
+    title: 'McKinsey Canada Student Leadership Award winners',
+    source: 'McKinsey & Company Canada',
+    href: 'https://www.linkedin.com/feed/update/urn:li:activity:7271848577771966464/',
+  },
+  {
+    title: 'Computing student earns top honours at hackathon',
+    source: 'Queen’s Faculty of Arts and Science',
+    href: 'https://www.queensu.ca/artsci/news/computing-student-earns-top-honours-at-hackathon',
+  },
+]
+
 export const SECTIONS: Section[] = [
   {
     id: 'about',
@@ -36,9 +61,9 @@ export const SECTIONS: Section[] = [
         <section className="portfolio-widget portfolio-widget--wide" aria-label="Introduction">
           <h3 className="portfolio-widget-label">Hello</h3>
           <p className="portfolio-lede">
-            I&rsquo;m <strong>Chloe Houvardas</strong> — a developer who likes the corner of the
-            web where engineering meets play. This site is my sketchbook of generative scenes:
-            everything is drawn by code and tuned to run smoothly on a phone.
+            I&rsquo;m <strong>Chloe Houvardas</strong>, and I turn &ldquo;what if&rdquo; into
+            working software. I&rsquo;m a CS + AI student at Queen&rsquo;s, with a soft spot for making things that feel a little magical.
+            You can most likely find me on my laptop, birdwatching, or at a hackathon.
           </p>
         </section>
 
@@ -92,14 +117,25 @@ export const SECTIONS: Section[] = [
 
         <section className="portfolio-widget" aria-label="Education">
           <h3 className="portfolio-widget-label">Education</h3>
-          <p className="portfolio-widget-headline">Bachelor of Computer Science</p>
-          <p className="portfolio-widget-sub">Queen&rsquo;s University · 2023 – 2028</p>
-          <p className="portfolio-widget-sub">
-            Minor in Statistics · Specialization in Artificial Intelligence
-          </p>
-          <p className="portfolio-widget-sub">
-            Coursework: Algorithms, Artificial Intelligence, Linear Algebra, Data Structures, Calculus, Statistics
-          </p>
+          <ul className="portfolio-schools">
+            <li>
+              <img className="portfolio-school-logo" src={queensCrest} alt="" />
+              <div>
+                <p className="portfolio-widget-headline">Bachelor of Computer Science</p>
+                <p className="portfolio-widget-sub">Queen&rsquo;s University · 2023&nbsp;–&nbsp;2028</p>
+                <p className="portfolio-widget-sub">
+                  Minor in Statistics · Specialization in Artificial Intelligence
+                </p>
+              </div>
+            </li>
+            <li>
+              <img className="portfolio-school-logo" src={koreaUniversitySymbol} alt="" />
+              <div>
+                <p className="portfolio-widget-headline">Exchange Semester</p>
+                <p className="portfolio-widget-sub">Korea University · Fall 2025</p>
+              </div>
+            </li>
+          </ul>
         </section>
 
         <section className="portfolio-widget" aria-label="Extracurricular experience">
@@ -135,22 +171,27 @@ export const SECTIONS: Section[] = [
           </ul>
         </section>
 
-        <section className="portfolio-widget" aria-label="Extracurriculars">
-          <h3 className="portfolio-widget-label">Beyond class</h3>
-          <ul className="portfolio-widget-list">
-            <li>Design society — poster nights &amp; crit sessions</li>
-            <li>Robotics club — vision subteam</li>
-            <li>Hackathons — 6 weekends, 2 wins</li>
-            <li>Sunrise running crew</li>
+        <section className="portfolio-widget" aria-label="Fun facts">
+          <h3 className="portfolio-widget-label">Fun facts!</h3>
+          <ul className="portfolio-widget-list portfolio-bullets">
+            <li>I am an avid birdwatcher</li>
+            <li>I lived in Seoul, South Korea for 5 months</li>
+            <li>I love gaming, and one of my favourites is Outer Wilds</li>
+            <li>I played competitive volleyball for 8 years</li>
           </ul>
         </section>
 
-        <section className="portfolio-widget" aria-label="Fun facts">
-          <h3 className="portfolio-widget-label">Fun facts</h3>
-          <ul className="portfolio-widget-list">
-            <li>You&rsquo;re currently flying through 8,000 clouds</li>
-            <li>Can solve a Rubik&rsquo;s cube in under two minutes</li>
-            <li>Firm believer that the best debugging tool is a walk</li>
+        <section className="portfolio-widget" aria-label="Articles I'm in">
+          <h3 className="portfolio-widget-label">Articles I&rsquo;m in!</h3>
+          <ul className="portfolio-widget-list portfolio-bullets portfolio-articles">
+            {ARTICLES.map((article) => (
+              <li key={article.href}>
+                <a href={article.href} target="_blank" rel="noreferrer noopener">
+                  {article.title}
+                </a>
+                <span className="portfolio-widget-sub">{article.source}</span>
+              </li>
+            ))}
           </ul>
         </section>
       </div>
@@ -185,7 +226,7 @@ export const SECTIONS: Section[] = [
     title: 'Contact',
     body: (
       <>
-        <p>Always happy to talk shop, side quests, or clouds.</p>
+        <p>Always happy to chat!</p>
         <div className="portfolio-contacts">
           <EmailButton />
           <a

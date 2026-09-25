@@ -65,14 +65,15 @@ test('projects section lists Devpost projects and flags winners', async ({ page 
   await page.goto('/')
   await page.getByRole('button', { name: 'Projects' }).click()
 
-  // All eight Devpost projects, newest first.
+  // All eight Devpost projects plus Nucleus, Policy Royale and DataGuardians,
+  // newest first.
   const toggles = page.locator('.portfolio-project-toggle')
-  await expect(toggles).toHaveCount(8)
+  await expect(toggles).toHaveCount(11)
   await expect(toggles.first()).toContainText('Ensemble')
   await expect(toggles.last()).toContainText('Bias Buddy')
 
   // Winners wear the ribbon; the rest don't.
-  await expect(page.locator('.portfolio-project--winner')).toHaveCount(4)
+  await expect(page.locator('.portfolio-project--winner')).toHaveCount(7)
   const prismToggle = page.getByRole('button', { name: /prism/i })
   await expect(prismToggle.locator('.portfolio-project-winner')).toHaveText(/winner/i)
   const ensembleToggle = page.getByRole('button', { name: /ensemble/i })

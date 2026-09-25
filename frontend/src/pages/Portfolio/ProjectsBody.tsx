@@ -20,6 +20,18 @@ import ghostwriterNotes from './media/ghostwriter-notes.jpg'
 import arborrouteDashboard from './media/arborroute-dashboard.jpg'
 import arborrouteLibrary from './media/arborroute-library.jpg'
 import arborrouteStory from './media/arborroute-story.jpg'
+import nucleusApp from './media/nucleus-app.jpg'
+import nucleusTeam from './media/nucleus-team.jpg'
+import nucleusDevs from './media/nucleus-devs.jpg'
+import nucleusCards from './media/nucleus-cards.jpg'
+import policyRoyaleApp from './media/policy-royale-app.jpg'
+import policyRoyalePitch from './media/policy-royale-pitch.jpg'
+import policyRoyaleStage from './media/policy-royale-stage.jpg'
+import policyRoyaleAwards from './media/policy-royale-awards.jpg'
+import policyRoyaleVenue from './media/policy-royale-venue.jpg'
+import cleanRoomPoster from './media/clean-room-poster.jpg'
+import cleanRoomFramework from './media/clean-room-framework.jpg'
+import cleanRoomGenai from './media/clean-room-genai.jpg'
 import biasBuddyCover from './media/bias-buddy-cover.jpg'
 
 /** A gallery slide: 'image' is a still, 'video' a local mp4/webm, and
@@ -39,13 +51,15 @@ interface Project {
    *  the Winner ribbon. */
   awards: string[]
   tech: string
-  /** Devpost page (or any other public write-ups). */
+  /** Devpost page, or the public posts and articles that tell the story. */
   links: { label: string; href: string }[]
   github?: string
   media: MediaItem[]
 }
 
-/** Mirrors https://devpost.com/ToastDuck, newest first. */
+/** Mirrors https://devpost.com/ToastDuck, newest first, plus wins that live
+ *  outside Devpost: Nucleus (QTMA product team), Policy Royale (Fintech80
+ *  Chengdu) and DataGuardians (Trustworthy AI Lab x GES). */
 const PROJECTS: Project[] = [
   {
     id: 'ensemble',
@@ -156,6 +170,29 @@ const PROJECTS: Project[] = [
     ],
   },
   {
+    id: 'nucleus',
+    name: 'Nucleus',
+    blurb: 'The all-in-one student planner used by 100+ Queen\'s students',
+    detail:
+      'Upload a course syllabus and Nucleus reads the assignments, weights and due dates out of it with an LLM, breaks them into AI-generated subtasks, and lines them up with your D2L courses in one dashboard. Built over a full year with the Queen\'s Technology & Media Association product team, from ideation to a public launch, and used by over 100 Queen\'s students. I contributed as a software developer across the React front end and the Spring Boot API.',
+    hackathon: 'QTMA Product Teams 2024–25',
+    awards: ['McKinsey Demo Day Winner'],
+    tech: 'React · Tailwind · Spring Boot · Java · MongoDB · OpenAI · Google OAuth',
+    links: [
+      {
+        label: 'LinkedIn',
+        href: 'https://www.linkedin.com/feed/update/urn:li:activity:7309722856366460929/',
+      },
+    ],
+    github: 'https://github.com/kayne-lee/team-MC',
+    media: [
+      { type: 'image', src: nucleusApp, alt: 'Nucleus on a laptop: a course page with quizzes, assignments and a grade calculator' },
+      { type: 'image', src: nucleusCards, alt: 'A Nucleus day card listing tasks grouped by course' },
+      { type: 'image', src: nucleusTeam, alt: 'The Nucleus team in front of a green wall at the McKinsey Toronto office' },
+      { type: 'image', src: nucleusDevs, alt: 'Four Nucleus developers making W signs' },
+    ],
+  },
+  {
     id: 'arborroute',
     name: 'ArborRoute',
     blurb: 'A Fitbit and Strava for tree planters',
@@ -171,6 +208,58 @@ const PROJECTS: Project[] = [
       { type: 'embed', provider: 'youtube', id: 'fCD0U-s0Ruw' },
       { type: 'image', src: arborrouteLibrary, alt: 'The forest library of planted trees' },
       { type: 'image', src: arborrouteStory, alt: 'The story tree view' },
+    ],
+  },
+  {
+    id: 'policy-royale',
+    name: 'Policy Royale',
+    blurb: 'An AI underwriter and dynamic policy tool for autonomous-vehicle insurance',
+    detail:
+      'Built in 80 hours at the Fintech80 hackathon in Chengdu, where our team, the Data Queens, was the only Canadian entry among eight invited universities from the United States, Switzerland, Singapore, Hong Kong and mainland China. Policy Royale drafts personalised insurance policies for autonomous vehicles from a driver profile, vehicle specs and accident history: a retrieval-augmented pipeline over Azure OpenAI and LangChain generates the policy, scores the vehicle\'s safety features, and reprices the premium live as driving behaviour like speed and aggression changes. The Vue front end works on phone and desktop. After pitching to more than twenty government and industry judges we took the first-place Trailblazer prize.',
+    hackathon: 'Fintech80 Chengdu Hackathon 2024',
+    awards: ['First Place · Trailblazer Prize'],
+    tech: 'Vue.js · Flask · Python · Azure OpenAI · LangChain · RAG · vector embeddings',
+    links: [
+      {
+        label: 'LinkedIn',
+        href: 'https://www.linkedin.com/posts/chloe-houvardas_no-way-that-just-happened-we-just-won-a-activity-7260454922960171008-9nxv',
+      },
+      { label: 'Live demo', href: 'https://jazzy-madeleine-4ecbee.netlify.app/' },
+      { label: 'Backend', href: 'https://github.com/ChloeHouvardas/chengdu80-backend' },
+    ],
+    github: 'https://github.com/ChloeHouvardas/fintech-80',
+    media: [
+      { type: 'image', src: policyRoyaleApp, alt: 'Policy Royale on the presentation screen next to a countdown timer' },
+      { type: 'image', src: policyRoyalePitch, alt: 'Chloe pitching Policy Royale to the judges' },
+      { type: 'image', src: policyRoyaleStage, alt: 'Team Queen\'s University of Canada celebrating on the Fintech80 stage' },
+      { type: 'image', src: policyRoyaleAwards, alt: 'The Data Queens receiving first-place awards and medals' },
+      { type: 'image', src: policyRoyaleVenue, alt: 'The Fintech80 Chengdu 2024 competitor wall' },
+    ],
+  },
+  {
+    id: 'clean-room',
+    name: 'DataGuardians',
+    blurb: 'A confidential data clean room on Intel TDX with TPM attestation',
+    detail:
+      'First place at the 2024 GenAI Hackathon, a month-long online event run by UCLA\'s Trustworthy AI Lab and the Global Entrepreneurship Society. An advertiser and a publisher each hold confidential data, so we built a clean room on an Azure Confidential VM where nothing is decrypted until the enclave proves itself: TPM endorsement and attestation keys, hashes of every script and dataset extended into platform configuration registers, and a remote key server that verifies the quote before releasing the wrapper key. Inside it we trained a click-through-rate model and a generative adversarial network that emits a synthetic replica dataset safe to use outside the room.',
+    hackathon: '2024 GenAI Hackathon · Trustworthy AI Lab x GES at UCLA',
+    awards: ['First Place'],
+    tech: 'Intel TDX · TPM 2.0 attestation · Azure Confidential VMs · tpm2-tools · Python · GAN · AES',
+    links: [
+      {
+        label: 'LinkedIn',
+        href: 'https://www.linkedin.com/posts/chloe-houvardas_after-a-month-of-planning-analyzing-coding-activity-7214088163940560897-whiQ',
+      },
+      {
+        label: 'UCI article',
+        href: 'https://ics.uci.edu/2024/07/31/ics-students-win-2024-genai-hackathon/',
+      },
+    ],
+    github: 'https://github.com/ChloeHouvardas/CC-TPM-Attestation',
+    media: [
+      { type: 'image', src: cleanRoomPoster, alt: 'Trustworthy AI Lab x GES at UCLA hackathon poster' },
+      { type: 'image', src: cleanRoomFramework, alt: 'Diagram of the clean room: evidence gathered in the VM guest TEE, then a quote verified by a key server before the model and data are decrypted' },
+      { type: 'image', src: cleanRoomGenai, alt: 'UC Irvine article banner for the 2024 GenAI Hackathon win' },
     ],
   },
   {

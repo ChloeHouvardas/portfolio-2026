@@ -149,7 +149,7 @@ export default function PortfolioPage() {
         {view.phase === 'sky' && (
           <div className="portfolio-hero">
             <h1>Chloe Houvardas</h1>
-            <p className="portfolio-subtitle">Software Developer</p>
+            <p className="portfolio-subtitle">Software Engineer</p>
             <p className="portfolio-tagline">{TAGLINE}</p>
             <nav aria-label="Sections" className="portfolio-nav">
               {SECTIONS.map((s) => (

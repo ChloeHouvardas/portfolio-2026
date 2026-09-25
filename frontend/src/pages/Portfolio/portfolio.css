@@ -423,10 +423,45 @@ main.portfolio-content {
 }
 
 .portfolio-project-name {
-  display: block;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.45rem;
   font-size: 1.0625rem;
   font-weight: 600;
   letter-spacing: -0.022em;
+}
+
+/* Winner ribbon — a warm gold seal on the same hairline-pill vocabulary as
+   the skills chips, so it reads as a badge without shouting. */
+.portfolio-project-winner {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.28rem;
+  padding: 0.12rem 0.55rem 0.12rem 0.42rem;
+  border: 1px solid rgba(201, 151, 0, 0.42);
+  border-radius: 9999px;
+  background: rgba(255, 214, 102, 0.34);
+  background-image: var(--sheen-soft);
+  box-shadow: var(--rim-soft);
+  color: #7a5200;
+  font-size: 0.6875rem;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  line-height: 1.4;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.portfolio-project-winner svg {
+  width: 0.85rem;
+  height: 0.85rem;
+  color: #c68a00;
+}
+
+/* Winning cards carry a faint gold thread along the left edge. */
+.portfolio-project--winner {
+  box-shadow: var(--rim-soft), inset 3px 0 0 rgba(255, 196, 61, 0.55);
 }
 
 .portfolio-project-blurb {
@@ -497,10 +532,12 @@ main.portfolio-content {
   width: 100%;
 }
 
-/* Live scene preview: a running embed that acts as a living thumbnail —
-   pointer-events off so its own UI can't be clicked from here. */
-.portfolio-project-slide--live {
-  pointer-events: none;
+/* Demo video embed: a 16:9 player sized to the strip's height. */
+.portfolio-project-slide--embed {
+  width: auto;
+  aspect-ratio: 16 / 9;
+  border: 1px solid var(--hairline);
+  background: #000;
 }
 
 .portfolio-project-details-content p {
@@ -516,6 +553,65 @@ main.portfolio-content {
   font-weight: 400;
   letter-spacing: 0;
   color: var(--ink-muted) !important;
+}
+
+/* Event line — hackathon name, then one gold chip per prize. */
+.portfolio-project-event {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 0.4rem;
+  font-size: 0.8125rem !important;
+  color: var(--ink-secondary) !important;
+}
+
+.portfolio-project-hackathon {
+  font-weight: 600;
+  letter-spacing: -0.016em;
+  color: var(--ink);
+}
+
+.portfolio-project-award {
+  display: inline-flex;
+  align-items: center;
+  padding: 0.1rem 0.55rem;
+  border: 1px solid rgba(201, 151, 0, 0.38);
+  border-radius: 9999px;
+  background: rgba(255, 214, 102, 0.26);
+  color: #7a5200;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: -0.006em;
+  line-height: 1.5;
+}
+
+/* Outbound links — quiet text links with a 44px tap height. */
+.portfolio-project-links {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.25rem 1rem;
+  margin-bottom: 0 !important;
+}
+
+.portfolio-project-links a {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  color: var(--blue);
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: -0.016em;
+  text-decoration: none;
+}
+
+.portfolio-project-links a:hover {
+  text-decoration: underline;
+}
+
+.portfolio-project-links a:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+  border-radius: 4px;
 }
 
 /* Skills — quiet hairline chips */

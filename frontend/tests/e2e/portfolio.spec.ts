@@ -53,36 +53,56 @@ test('flying to a section and back works', async ({ page }) => {
   expect(errors).toEqual([])
 })
 
-test('projects section expands cards with embedded media', async ({ page }) => {
+test('projects section lists Devpost projects and flags winners', async ({ page }) => {
   const errors = collectErrors(page)
+
+  // Demo embeds point at Vimeo/YouTube; answer them with a blank page so the
+  // third-party player's own network chatter stays out of this run.
+  await page.route(/^https?:\/\/(?!127\.0\.0\.1|localhost)/, (route) =>
+    route.fulfill({ status: 200, contentType: 'text/html', body: '<!doctype html><title>stub</title>' }),
+  )
 
   await page.goto('/')
   await page.getByRole('button', { name: 'Projects' }).click()
 
-  const rainbowToggle = page.getByRole('button', { name: /rainbow tree/i })
-  await expect(rainbowToggle).toBeVisible()
-  await expect(page.getByRole('button', { name: /star system/i })).toBeVisible()
-  await expect(page.getByRole('button', { name: /clouds/i })).toBeVisible()
+  // All eight Devpost projects, newest first.
+  const toggles = page.locator('.portfolio-project-toggle')
+  await expect(toggles).toHaveCount(8)
+  await expect(toggles.first()).toContainText('Ensemble')
+  await expect(toggles.last()).toContainText('Bias Buddy')
+
+  // Winners wear the ribbon; the rest don't.
+  await expect(page.locator('.portfolio-project--winner')).toHaveCount(4)
+  const prismToggle = page.getByRole('button', { name: /prism/i })
+  await expect(prismToggle.locator('.portfolio-project-winner')).toHaveText(/winner/i)
+  const ensembleToggle = page.getByRole('button', { name: /ensemble/i })
+  await expect(ensembleToggle.locator('.portfolio-project-winner')).toHaveCount(0)
 
   // Collapsed details are hidden until the card is expanded.
-  const detail = page.getByText('seeded flow-field tree')
-  await expect(rainbowToggle).toHaveAttribute('aria-expanded', 'false')
+  const detail = page.getByText('eight kinds of misinformation')
+  await expect(prismToggle).toHaveAttribute('aria-expanded', 'false')
   await expect(detail).not.toBeVisible()
 
-  await rainbowToggle.click()
-  await expect(rainbowToggle).toHaveAttribute('aria-expanded', 'true')
+  await prismToggle.click()
+  await expect(prismToggle).toHaveAttribute('aria-expanded', 'true')
   await expect(detail).toBeVisible()
+  await expect(page.getByText('HackHer 2026')).toBeVisible()
+  await expect(page.locator('.portfolio-project-award', { hasText: 'First Place' }).first()).toBeVisible()
+  await expect(page.getByRole('link', { name: 'Devpost' }).first()).toHaveAttribute(
+    'href',
+    'https://devpost.com/software/prism-5j2tda',
+  )
 
-  // The live scene embed mounts on expand and stays on this page.
-  const live = page.locator('iframe[title="Rainbow Tree live preview"]')
-  await expect(live).toBeVisible()
+  // The demo embed mounts on expand and stays on this page.
+  const demo = page.locator('iframe[title="Prism demo video"]')
+  await expect(demo).toHaveCount(1)
   await expect(page).toHaveURL(/\/$/)
 
   // Collapsing hides the details and unmounts the embed.
-  await rainbowToggle.click()
-  await expect(rainbowToggle).toHaveAttribute('aria-expanded', 'false')
+  await prismToggle.click()
+  await expect(prismToggle).toHaveAttribute('aria-expanded', 'false')
   await expect(detail).not.toBeVisible()
-  await expect(live).toHaveCount(0)
+  await expect(demo).toHaveCount(0)
 
   expect(errors).toEqual([])
 })

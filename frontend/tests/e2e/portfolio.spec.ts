@@ -69,11 +69,18 @@ test('projects section lists Devpost projects and flags winners', async ({ page 
   // newest first.
   const toggles = page.locator('.portfolio-project-toggle')
   await expect(toggles).toHaveCount(11)
-  await expect(toggles.first()).toContainText('Ensemble')
+
+  // Winners first (newest first), then the rest (newest first).
+  await expect(toggles.first()).toContainText('Paper Cuts')
+  await expect(toggles.nth(7)).toContainText('Ensemble')
   await expect(toggles.last()).toContainText('Bias Buddy')
+  const winners = page.locator('.portfolio-project--winner')
+  await expect(winners).toHaveCount(7)
+  for (let i = 0; i < 7; i++) {
+    await expect(page.locator('.portfolio-project').nth(i)).toHaveClass(/portfolio-project--winner/)
+  }
 
   // Winners wear the ribbon; the rest don't.
-  await expect(page.locator('.portfolio-project--winner')).toHaveCount(7)
   const prismToggle = page.getByRole('button', { name: /prism/i })
   await expect(prismToggle.locator('.portfolio-project-winner')).toHaveText(/winner/i)
   const ensembleToggle = page.getByRole('button', { name: /ensemble/i })

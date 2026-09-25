@@ -59,8 +59,9 @@ interface Project {
 
 /** Mirrors https://devpost.com/ToastDuck, newest first, plus wins that live
  *  outside Devpost: Nucleus (QTMA product team), Policy Royale (Fintech80
- *  Chengdu) and DataGuardians (Trustworthy AI Lab x GES). */
-const PROJECTS: Project[] = [
+ *  Chengdu) and DataGuardians (Trustworthy AI Lab x GES). Winners are
+ *  listed first at render time; see PROJECTS below. */
+const ALL_PROJECTS: Project[] = [
   {
     id: 'ensemble',
     name: 'Ensemble',
@@ -274,6 +275,12 @@ const PROJECTS: Project[] = [
     links: [{ label: 'Devpost', href: 'https://devpost.com/software/bias-buddy-qhcrvl' }],
     media: [{ type: 'image', src: biasBuddyCover, alt: "Bias Buddy's Devpost cover: a tabby cat on a festive tablecloth" }],
   },
+]
+
+/** Winners first, then the rest — each group keeps its newest-first order. */
+const PROJECTS: Project[] = [
+  ...ALL_PROJECTS.filter((p) => p.awards.length > 0),
+  ...ALL_PROJECTS.filter((p) => p.awards.length === 0),
 ]
 
 const EMBED_SRC = {

@@ -1,8 +1,56 @@
-export default function App() {
+import { lazy, Suspense } from 'react'
+import { usePathname } from './router'
+import RainbowTreePage from './pages/RainbowTree/RainbowTreePage'
+import StarSystemPage from './pages/StarSystem/StarSystemPage'
+
+// Lazy: these scenes pull in three.js, which the canvas pages don't need.
+const CloudsPage = lazy(() => import('./pages/Clouds/CloudsPage'))
+const PortfolioPage = lazy(() => import('./pages/Portfolio/PortfolioPage'))
+
+/**
+ * Shown while the portfolio chunk loads: the same sky and title as the
+ * portfolio hero, inline-styled so it needs nothing from the lazy chunk.
+ */
+function HomeFallback() {
   return (
-    <main>
-      <h1>Portfolio 2026</h1>
-      <p>Starting from scratch.</p>
-    </main>
+    <div
+      style={{
+        position: 'fixed',
+        inset: 0,
+        display: 'grid',
+        placeItems: 'center',
+        background: 'linear-gradient(#a8b6c4 0%, #e8edf2 78%)',
+      }}
+    >
+      <h1
+        style={{
+          margin: 0,
+          color: '#1d1d1f',
+          fontFamily: "-apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif",
+          fontWeight: 600,
+          letterSpacing: '-0.005em',
+          fontSize: 'clamp(2.5rem, 6vw, 3.5rem)',
+        }}
+      >
+        Chloe Houvardas
+      </h1>
+    </div>
+  )
+}
+
+export default function App() {
+  const pathname = usePathname()
+  if (pathname === '/rainbow-tree') return <RainbowTreePage />
+  if (pathname === '/star-system') return <StarSystemPage />
+  if (pathname === '/clouds')
+    return (
+      <Suspense fallback={null}>
+        <CloudsPage />
+      </Suspense>
+    )
+  return (
+    <Suspense fallback={<HomeFallback />}>
+      <PortfolioPage />
+    </Suspense>
   )
 }

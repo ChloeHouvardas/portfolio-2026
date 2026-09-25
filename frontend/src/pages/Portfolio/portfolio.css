@@ -1,0 +1,690 @@
+.portfolio-page {
+  /* Apple light system floating over a photographic sky.
+     Type: SF Pro scale (17px body, weights 400/600 only).
+     Color: achromatic restraint — ink + one Action Blue accent. */
+  --sky-top: #a8b6c4;
+  --sky-bottom: #e8edf2;
+  --ink: #1d1d1f;
+  --ink-secondary: #6e6e73; /* on white/frost surfaces only */
+  --ink-muted: #86868b; /* decorative glyphs, fine print */
+  --ink-hero-soft: rgba(29, 29, 31, 0.62); /* secondary text over open sky */
+  --hairline-frost: rgba(255, 255, 255, 0.7);
+  --hairline: rgba(210, 210, 215, 0.9);
+  --surface-card: rgba(255, 255, 255, 0.62);
+  --surface-tile: rgba(245, 245, 247, 0.55);
+  --bar: rgba(255, 255, 255, 0.48);
+  --material: saturate(180%) blur(24px);
+  /* Liquid Glass anatomy: full rim light + brighter top edge, and a
+     directional sheen layered over the tint. Soft variants keep interior
+     surfaces quieter than floating chrome. */
+  --rim: inset 0 0 0 1px rgba(255, 255, 255, 0.32), inset 0 1px 0 rgba(255, 255, 255, 0.75);
+  --rim-soft: inset 0 0 0 1px rgba(255, 255, 255, 0.22), inset 0 1px 0 rgba(255, 255, 255, 0.5);
+  --sheen: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.42) 0%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0.1) 78%
+  );
+  --sheen-soft: linear-gradient(
+    115deg,
+    rgba(255, 255, 255, 0.22) 0%,
+    rgba(255, 255, 255, 0) 38%,
+    rgba(255, 255, 255, 0.05) 78%
+  );
+  --lift: 0 4px 24px rgba(0, 0, 0, 0.08);
+  --blue: #0066cc;
+  --focus: #0071e3;
+
+  position: fixed;
+  inset: 0;
+  background: linear-gradient(var(--sky-top) 0%, var(--sky-bottom) 78%);
+  font-family: -apple-system, BlinkMacSystemFont, 'Inter', 'Segoe UI', sans-serif;
+  color: var(--ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+.portfolio-canvas {
+  display: block;
+  width: 100%;
+  height: 100%;
+  touch-action: none;
+  /* Lift the cloud scene into a near-white photographic canvas. */
+  filter: saturate(0.45) brightness(1.14) contrast(0.94);
+}
+
+main.portfolio-content {
+  position: absolute;
+  inset: 0;
+  display: grid;
+  place-items: center;
+  /* Top padding clears the floating Back pill so cards never slide under it. */
+  padding: calc(3.9rem + env(safe-area-inset-top, 0px)) calc(1rem + env(safe-area-inset-right, 0px))
+    calc(1rem + env(safe-area-inset-bottom, 0px)) calc(1rem + env(safe-area-inset-left, 0px));
+  pointer-events: none; /* the sky stays draggable between the islands of UI */
+}
+
+.portfolio-hero,
+.portfolio-card {
+  pointer-events: auto;
+}
+
+/* Hero — Apple two-tone display headline over the sky */
+
+.portfolio-hero {
+  text-align: center;
+  animation: portfolio-fade-in 0.6s ease-out both;
+}
+
+.portfolio-hero h1 {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.07;
+  color: var(--ink);
+}
+
+.portfolio-subtitle {
+  margin: 0;
+  font-size: clamp(2.5rem, 6vw, 3.5rem);
+  font-weight: 600;
+  letter-spacing: -0.005em;
+  line-height: 1.14;
+  color: var(--ink-hero-soft);
+}
+
+.portfolio-tagline {
+  margin: 1.1rem 0 2.2rem;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  line-height: 1.47;
+  letter-spacing: -0.022em;
+  color: var(--ink-hero-soft);
+}
+
+/* Segmented nav — Apple sticky-bar material, no chrome shadows */
+
+.portfolio-nav {
+  display: inline-flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 0.25rem;
+  padding: 0.3rem;
+  border: 1px solid var(--hairline-frost);
+  border-radius: 9999px;
+  background: var(--bar);
+  background-image: var(--sheen);
+  box-shadow: var(--rim), var(--lift);
+  backdrop-filter: var(--material);
+  -webkit-backdrop-filter: var(--material);
+}
+
+.portfolio-pill {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 44px;
+  padding: 0 1.375rem;
+  border: 1px solid transparent;
+  border-radius: 9999px;
+  background: transparent;
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  cursor: pointer;
+  transition: background-color 0.2s ease;
+}
+
+.portfolio-pill:hover {
+  background: rgba(255, 255, 255, 0.65);
+}
+
+.portfolio-pill:active {
+  background: rgba(255, 255, 255, 0.8);
+}
+
+.portfolio-pill:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+/* Utility card — white, hairline, 18px radius */
+
+.portfolio-card {
+  width: min(560px, 100%);
+  max-height: calc(100dvh - 5rem);
+  overflow-y: auto;
+  padding: 1.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  background: var(--surface-card);
+  background-image: var(--sheen);
+  color: var(--ink);
+  box-shadow: var(--rim), var(--lift);
+  backdrop-filter: var(--material);
+  -webkit-backdrop-filter: var(--material);
+  animation: portfolio-card-in 0.35s ease-out both;
+}
+
+.portfolio-card:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.portfolio-card--wide {
+  width: min(880px, 100%);
+}
+
+.portfolio-card h2 {
+  margin: 0 0 1.1rem;
+  font-size: 1.75rem;
+  font-weight: 600;
+  line-height: 1.14;
+  letter-spacing: -0.01em;
+}
+
+.portfolio-card-body p {
+  margin: 0 0 0.9rem;
+  font-size: 1.0625rem;
+  line-height: 1.47;
+  letter-spacing: -0.022em;
+  color: var(--ink);
+}
+
+.portfolio-lede {
+  font-size: 1.0625rem;
+}
+
+/* Bento board — #f5f5f7 tiles, fine-print labels */
+
+.portfolio-bento {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 0.75rem;
+}
+
+@media (min-width: 640px) {
+  .portfolio-bento {
+    grid-template-columns: 1fr 1fr;
+  }
+  .portfolio-widget--wide {
+    grid-column: span 2;
+  }
+}
+
+.portfolio-widget {
+  padding: 1.25rem 1.5rem;
+  border: 1px solid var(--hairline);
+  border-radius: 18px;
+  background: var(--surface-tile);
+  background-image: var(--sheen-soft);
+  box-shadow: var(--rim-soft);
+}
+
+.portfolio-widget-label {
+  margin: 0 0 0.6rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--ink-secondary);
+}
+
+.portfolio-widget p {
+  margin: 0 0 0.45rem;
+}
+
+.portfolio-widget-headline {
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+
+.portfolio-widget-sub {
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: -0.016em;
+  color: var(--ink-secondary);
+}
+
+.portfolio-widget-list {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  color: var(--ink);
+}
+
+/* Mini timeline — hairline rail, Action Blue dots (the one accent) */
+
+.portfolio-timeline {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.85rem;
+}
+
+.portfolio-timeline li {
+  position: relative;
+  display: flex;
+  gap: 0.7rem;
+  padding-left: 1rem;
+}
+
+.portfolio-timeline li::before {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0.42em;
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: var(--blue);
+}
+
+.portfolio-timeline li:not(:last-child)::after {
+  content: '';
+  position: absolute;
+  left: 3px;
+  top: 1.15em;
+  bottom: -0.85rem;
+  width: 1px;
+  background: var(--hairline);
+}
+
+.portfolio-timeline-when {
+  flex-shrink: 0;
+  font-size: 0.78rem;
+  font-weight: 400;
+  color: var(--ink-secondary);
+  padding-top: 0.15em;
+  font-variant-numeric: tabular-nums;
+}
+
+.portfolio-timeline strong {
+  display: block;
+  font-size: 0.94rem;
+  font-weight: 600;
+  letter-spacing: -0.016em;
+}
+
+.portfolio-timeline div span {
+  display: block;
+  font-size: 0.85rem;
+  color: var(--ink-secondary);
+}
+
+/* Back to sky — floating sticky-bar pill, pinned like the scene pages'
+   Home pill so it never hides behind the card's scroll. */
+
+.portfolio-back {
+  position: absolute;
+  top: calc(0.75rem + env(safe-area-inset-top, 0px));
+  left: calc(0.75rem + env(safe-area-inset-left, 0px));
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1.375rem;
+  border: 1px solid var(--hairline-frost);
+  border-radius: 9999px;
+  background: var(--bar);
+  color: var(--ink);
+  font: inherit;
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  cursor: pointer;
+  pointer-events: auto;
+  background-image: var(--sheen);
+  box-shadow: var(--rim), var(--lift);
+  backdrop-filter: var(--material);
+  -webkit-backdrop-filter: var(--material);
+  transition: background-color 0.2s ease;
+  animation: portfolio-fade-in 0.35s ease-out both;
+}
+
+.portfolio-back:hover {
+  background: rgba(255, 255, 255, 0.85);
+}
+
+.portfolio-back:active {
+  background: #ffffff;
+}
+
+.portfolio-back:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 3px;
+}
+
+/* Projects — hairline tiles with collapsible details */
+
+.portfolio-projects {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  gap: 0.6rem;
+}
+
+.portfolio-project {
+  border: 1px solid var(--hairline);
+  border-radius: 12px;
+  background: rgba(255, 255, 255, 0.4);
+  background-image: var(--sheen-soft);
+  box-shadow: var(--rim-soft);
+  transition: background-color 0.2s ease;
+}
+
+.portfolio-project:hover {
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.portfolio-project--open {
+  background: rgba(255, 255, 255, 0.66);
+}
+
+.portfolio-project-toggle {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: center;
+  gap: 0.7rem;
+  width: 100%;
+  min-height: 44px;
+  padding: 0.85rem 1.1rem;
+  border: 0;
+  border-radius: inherit;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+
+.portfolio-project-toggle:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: -2px;
+  border-radius: 12px;
+}
+
+.portfolio-project-name {
+  display: block;
+  font-size: 1.0625rem;
+  font-weight: 600;
+  letter-spacing: -0.022em;
+}
+
+.portfolio-project-blurb {
+  display: block;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: -0.016em;
+  color: var(--ink-secondary);
+}
+
+.portfolio-project-chevron {
+  font-size: 1.3rem;
+  line-height: 1;
+  color: var(--ink-muted);
+}
+
+/* Collapsible details — grid-rows 0fr→1fr keeps the unfold buttery. */
+
+.portfolio-project-details {
+  display: grid;
+  grid-template-rows: 0fr;
+}
+
+.portfolio-project--open .portfolio-project-details {
+  grid-template-rows: 1fr;
+}
+
+.portfolio-project-details-inner {
+  overflow: hidden;
+  visibility: hidden;
+}
+
+.portfolio-project--open .portfolio-project-details-inner {
+  visibility: visible;
+}
+
+.portfolio-project-details-content {
+  padding: 0 1.1rem 1rem;
+}
+
+/* Media strip — horizontally snapping gallery for images or video */
+
+.portfolio-project-gallery {
+  display: flex;
+  gap: 0.5rem;
+  margin-bottom: 0.85rem;
+  overflow-x: auto;
+  /* proximity, not mandatory: mandatory re-snaps jump the strip when the
+     live embed loads mid-expand */
+  scroll-snap-type: x proximity;
+  -webkit-overflow-scrolling: touch;
+  scrollbar-width: thin;
+}
+
+.portfolio-project-slide {
+  flex: 0 0 auto;
+  width: min(78%, 340px);
+  height: clamp(150px, 26vw, 210px);
+  object-fit: cover;
+  border: 1px solid var(--hairline);
+  border-radius: 8px; /* Apple interior-image radius */
+  scroll-snap-align: start;
+  background: #f5f5f7;
+}
+
+/* A lone slide fills the card width. */
+.portfolio-project-slide:only-child {
+  width: 100%;
+}
+
+/* Live scene preview: a running embed that acts as a living thumbnail —
+   pointer-events off so its own UI can't be clicked from here. */
+.portfolio-project-slide--live {
+  pointer-events: none;
+}
+
+.portfolio-project-details-content p {
+  margin: 0 0 0.7rem;
+  font-size: 0.875rem;
+  line-height: 1.43;
+  letter-spacing: -0.016em;
+  color: var(--ink);
+}
+
+.portfolio-project-tech {
+  font-size: 0.75rem !important;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--ink-muted) !important;
+}
+
+/* Skills — quiet hairline chips */
+
+.portfolio-skills {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.45rem;
+}
+
+.portfolio-chip {
+  padding: 0.42rem 0.95rem;
+  border: 1px solid var(--hairline);
+  border-radius: 999px;
+  background: rgba(255, 255, 255, 0.42);
+  background-image: var(--sheen-soft);
+  box-shadow: var(--rim-soft);
+  font-size: 0.875rem;
+  font-weight: 400;
+  letter-spacing: -0.016em;
+  color: var(--ink);
+}
+
+/* Contact — Apple pill pair: one primary, the rest secondary */
+
+.portfolio-contacts {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.portfolio-contact {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  padding: 0 1.375rem;
+  border: 1px solid var(--blue);
+  border-radius: 9999px;
+  background: rgba(255, 255, 255, 0.72);
+  background-image: var(--sheen-soft);
+  color: var(--blue);
+  font-size: 1.0625rem;
+  font-weight: 400;
+  letter-spacing: -0.022em;
+  text-decoration: none;
+  transition: background-color 0.2s ease;
+}
+
+.portfolio-contact:hover {
+  background: #ffffff;
+}
+
+.portfolio-contact:focus-visible {
+  outline: 2px solid var(--focus);
+  outline-offset: 2px;
+}
+
+.portfolio-contact--primary {
+  background: var(--blue);
+  border-color: var(--blue);
+  color: #ffffff;
+}
+
+.portfolio-contact--primary:hover {
+  background: #0071e3;
+}
+
+/* Motion — restrained: fades, folds, and the system-wide press scale */
+
+@keyframes portfolio-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@keyframes portfolio-card-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  @keyframes portfolio-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(14px) scale(0.98);
+    }
+    to {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+    }
+  }
+
+  .portfolio-pill,
+  .portfolio-back,
+  .portfolio-contact,
+  .portfolio-project-toggle {
+    transition: background-color 0.2s ease,
+      transform 0.18s cubic-bezier(0.34, 1.3, 0.64, 1);
+  }
+  .portfolio-pill:active,
+  .portfolio-back:active,
+  .portfolio-contact:active,
+  .portfolio-project-toggle:active {
+    transform: scale(0.95); /* Apple's system-wide press */
+  }
+
+  .portfolio-project-details {
+    transition: grid-template-rows 0.3s ease;
+  }
+  .portfolio-project-details-inner {
+    transition: visibility 0s 0.3s; /* stay visible while folding shut */
+  }
+  .portfolio-project--open .portfolio-project-details-inner {
+    transition: visibility 0s;
+  }
+  .portfolio-project-chevron {
+    transition: transform 0.25s ease;
+  }
+  .portfolio-project--open .portfolio-project-chevron {
+    transform: rotate(90deg);
+  }
+}
+
+/* Without motion, the chevron still signals state. */
+@media (prefers-reduced-motion: reduce) {
+  .portfolio-project--open .portfolio-project-chevron {
+    transform: rotate(90deg);
+  }
+}
+
+/* True liquid-glass refraction (Chromium only — gated in PortfolioPage):
+   the SVG lens filter displaces, blurs and saturates the backdrop itself. */
+.portfolio-page[data-lens='on'] .portfolio-nav,
+.portfolio-page[data-lens='on'] .portfolio-back {
+  backdrop-filter: url(#portfolio-lens);
+  -webkit-backdrop-filter: url(#portfolio-lens);
+}
+
+/* Large sheets refract subtly at the edges only; the map's neutral center
+   leaves body text on plain frost. */
+.portfolio-page[data-lens='on'] .portfolio-card {
+  backdrop-filter: url(#portfolio-lens-sheet);
+  -webkit-backdrop-filter: url(#portfolio-lens-sheet);
+}
+
+/* Older browsers without backdrop-filter get near-solid surfaces. */
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  .portfolio-nav,
+  .portfolio-back {
+    background: rgba(255, 255, 255, 0.94);
+  }
+  .portfolio-card {
+    background: #ffffff;
+  }
+}
+
+/* Utilities */
+
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}

@@ -221,7 +221,8 @@ main.portfolio-content {
 .portfolio-widget {
   padding: 1.25rem 1.5rem;
   border: 1px solid var(--hairline);
-  border-radius: 18px;
+  /* Concentric radii: card 18 → interior tiles/rows 12 → media 8. */
+  border-radius: 12px;
   background: var(--surface-tile);
   background-image: var(--sheen-soft);
   box-shadow: var(--rim-soft);
@@ -313,7 +314,7 @@ main.portfolio-content {
 
 .portfolio-timeline-company {
   font-size: 0.85rem;
-  font-weight: 500;
+  font-weight: 400;
 }
 
 .portfolio-timeline-when {
@@ -384,7 +385,7 @@ main.portfolio-content {
 .portfolio-project {
   border: 1px solid var(--hairline);
   border-radius: 12px;
-  background: rgba(255, 255, 255, 0.4);
+  background: rgba(255, 255, 255, 0.42);
   background-image: var(--sheen-soft);
   box-shadow: var(--rim-soft);
   transition: background-color 0.2s ease;
@@ -541,7 +542,8 @@ main.portfolio-content {
   color: var(--ink);
 }
 
-/* Contact — Apple pill pair: one primary, the rest secondary */
+/* Contact — same interior control glass as project rows and chips;
+   the email pill stays the site's single blue CTA. */
 
 .portfolio-contacts {
   display: flex;
@@ -554,11 +556,12 @@ main.portfolio-content {
   align-items: center;
   min-height: 44px;
   padding: 0 1.375rem;
-  border: 1px solid var(--blue);
+  border: 1px solid var(--hairline);
   border-radius: 9999px;
-  background: rgba(255, 255, 255, 0.72);
+  background: rgba(255, 255, 255, 0.42);
   background-image: var(--sheen-soft);
-  color: var(--blue);
+  box-shadow: var(--rim-soft);
+  color: var(--ink);
   font-size: 1.0625rem;
   font-weight: 400;
   letter-spacing: -0.022em;
@@ -566,8 +569,17 @@ main.portfolio-content {
   transition: background-color 0.2s ease;
 }
 
+button.portfolio-contact {
+  font-family: inherit;
+  cursor: pointer;
+}
+
 .portfolio-contact:hover {
-  background: #ffffff;
+  background: rgba(255, 255, 255, 0.58);
+}
+
+.portfolio-contact:active {
+  background: rgba(255, 255, 255, 0.66);
 }
 
 .portfolio-contact:focus-visible {
@@ -577,12 +589,81 @@ main.portfolio-content {
 
 .portfolio-contact--primary {
   background: var(--blue);
+  background-image: none;
   border-color: var(--blue);
+  box-shadow: none;
   color: #ffffff;
 }
 
 .portfolio-contact--primary:hover {
   background: #0071e3;
+}
+
+/* Email modal — one floating glass sheet over the card (portalled to the
+   page root). Centered on wide screens, bottom-anchored on phones. */
+
+.portfolio-modal-scrim {
+  position: absolute;
+  inset: 0;
+  z-index: 30;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  padding: 1rem calc(1rem + env(safe-area-inset-right, 0px))
+    calc(1rem + env(safe-area-inset-bottom, 0px)) calc(1rem + env(safe-area-inset-left, 0px));
+  background: rgba(29, 29, 31, 0.22);
+  animation: portfolio-fade-in 0.2s ease both;
+}
+
+.portfolio-modal {
+  width: 100%;
+  max-width: 26rem;
+  padding: 1.5rem;
+  border: 1px solid var(--hairline-frost);
+  border-radius: 28px;
+  background: var(--surface-card);
+  background-image: var(--sheen);
+  box-shadow: var(--rim), var(--lift);
+  backdrop-filter: var(--material);
+  -webkit-backdrop-filter: var(--material);
+  text-align: center;
+  animation: portfolio-card-in 0.28s ease both;
+}
+
+.portfolio-modal .portfolio-widget-label {
+  margin-bottom: 0.75rem;
+}
+
+.portfolio-modal-address {
+  margin: 0 0 1.25rem;
+  font-size: clamp(1.05rem, 4.6vw, 1.375rem);
+  font-weight: 600;
+  letter-spacing: -0.022em;
+  overflow-wrap: anywhere;
+  user-select: all;
+}
+
+.portfolio-modal-actions {
+  display: flex;
+  justify-content: center;
+  flex-wrap: wrap;
+  gap: 0.6rem;
+}
+
+.portfolio-modal-actions .portfolio-contact {
+  justify-content: center;
+  min-width: 6.5rem;
+}
+
+@media (min-width: 640px) {
+  .portfolio-modal-scrim {
+    align-items: center;
+  }
+}
+
+.portfolio-page[data-lens='on'] .portfolio-modal {
+  backdrop-filter: url(#portfolio-lens-sheet);
+  -webkit-backdrop-filter: url(#portfolio-lens-sheet);
 }
 
 /* Motion — restrained: fades, folds, and the system-wide press scale */

@@ -1,4 +1,5 @@
 import type { ReactNode } from 'react'
+import EmailButton from './EmailButton'
 import ProjectsBody from './ProjectsBody'
 
 export type SectionId = 'about' | 'projects' | 'skills' | 'contact'
@@ -186,12 +187,7 @@ export const SECTIONS: Section[] = [
       <>
         <p>Always happy to talk shop, side quests, or clouds.</p>
         <div className="portfolio-contacts">
-          <a
-            className="portfolio-contact portfolio-contact--primary"
-            href="mailto:hello@example.com"
-          >
-            hello@example.com
-          </a>
+          <EmailButton />
           <a
             className="portfolio-contact"
             href="https://github.com/ChloeHouvardas"
@@ -202,7 +198,7 @@ export const SECTIONS: Section[] = [
           </a>
           <a
             className="portfolio-contact"
-            href="https://www.linkedin.com/"
+            href="https://www.linkedin.com/in/chloe-houvardas/"
             target="_blank"
             rel="noreferrer noopener"
           >

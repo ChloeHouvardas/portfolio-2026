@@ -1,9 +1,7 @@
 import { lazy, Suspense } from 'react'
 import { usePathname } from './router'
-import RainbowTreePage from './pages/RainbowTree/RainbowTreePage'
-import StarSystemPage from './pages/StarSystem/StarSystemPage'
 
-// Lazy: these scenes pull in three.js, which the canvas pages don't need.
+// Lazy: both pages pull in three.js; split so each route loads only its own scene.
 const CloudsPage = lazy(() => import('./pages/Clouds/CloudsPage'))
 const PortfolioPage = lazy(() => import('./pages/Portfolio/PortfolioPage'))
 
@@ -40,8 +38,6 @@ function HomeFallback() {
 
 export default function App() {
   const pathname = usePathname()
-  if (pathname === '/rainbow-tree') return <RainbowTreePage />
-  if (pathname === '/star-system') return <StarSystemPage />
   if (pathname === '/clouds')
     return (
       <Suspense fallback={null}>

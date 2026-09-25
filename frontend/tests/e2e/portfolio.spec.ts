@@ -15,7 +15,7 @@ test('portfolio home renders the cloud scene and animates', async ({ page }) => 
 
   await page.goto('/')
   await expect(page.getByRole('heading', { name: 'Chloe Houvardas' })).toBeVisible()
-  await expect(page.getByText('Building playful, performant things')).toBeVisible()
+  await expect(page.getByText('Hey! Welcome to my little corner of the sky')).toBeVisible()
   for (const label of ['About', 'Projects', 'Skills', 'Contact']) {
     await expect(page.getByRole('button', { name: label })).toBeVisible()
   }

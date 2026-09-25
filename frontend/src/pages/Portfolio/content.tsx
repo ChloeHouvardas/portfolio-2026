@@ -10,7 +10,7 @@ export interface Section {
   body: ReactNode
 }
 
-export const TAGLINE = 'Building playful, performant things for the web.'
+export const TAGLINE = 'Hey! Welcome to my little corner of the sky :-)'
 
 const SKILLS = [
   'TypeScript',
@@ -41,40 +41,97 @@ export const SECTIONS: Section[] = [
           </p>
         </section>
 
-        <section className="portfolio-widget" aria-label="Work experience">
+        <section className="portfolio-widget portfolio-widget--tall" aria-label="Work experience">
           <h3 className="portfolio-widget-label">Experience</h3>
           <ul className="portfolio-timeline">
             <li>
-              <span className="portfolio-timeline-when">2025</span>
-              <div>
-                <strong>Software Engineer Intern</strong>
-                <span>SampleCo — shipped web tooling used by 3 teams</span>
-              </div>
+              <strong>Software Engineer Intern</strong>
+              <span className="portfolio-timeline-company">CIBC</span>
+              <span className="portfolio-timeline-when">Sep 2026 – Present</span>
+              <span className="portfolio-timeline-desc">AI Applications Team</span>
             </li>
             <li>
-              <span className="portfolio-timeline-when">2024</span>
-              <div>
-                <strong>Web Developer</strong>
-                <span>Campus Innovation Lab — built interactive data stories</span>
-              </div>
+              <strong>Software Engineer Intern</strong>
+              <span className="portfolio-timeline-company">Chatforce</span>
+              <span className="portfolio-timeline-when">May – Jun 2026</span>
+              <span className="portfolio-timeline-desc">Agentic harness for game development</span>
             </li>
             <li>
-              <span className="portfolio-timeline-when">2023</span>
-              <div>
-                <strong>Teaching Assistant</strong>
-                <span>Intro to Programming — led weekly labs of 30 students</span>
-              </div>
+              <strong>Sales and Trading Intern</strong>
+              <span className="portfolio-timeline-company">National Bank of Canada</span>
+              <span className="portfolio-timeline-when">May – Aug 2025</span>
+              <span className="portfolio-timeline-desc">ETFs and Electronic Trading Team</span>
+            </li>
+            <li>
+              <strong>Data Analyst Intern</strong>
+              <span className="portfolio-timeline-company">Statistics Canada</span>
+              <span className="portfolio-timeline-when">May – Oct 2024</span>
+              <span className="portfolio-timeline-desc">Transport Canada Rail Team</span>
+            </li>
+            <li>
+              <strong>Volleyball Coach</strong>
+              <span className="portfolio-timeline-company">JAM</span>
+              <span className="portfolio-timeline-when">Apr – Sep 2024</span>
+              <span className="portfolio-timeline-desc">Volleyball training for adult athletes</span>
+            </li>
+            <li>
+              <strong>Software Engineer Intern</strong>
+              <span className="portfolio-timeline-company">Digitera.Interactive</span>
+              <span className="portfolio-timeline-when">Jun – Sep 2023</span>
+              <span className="portfolio-timeline-desc">Marketplace platform for high school events</span>
+            </li>
+            <li>
+              <strong>Software Engineer Intern</strong>
+              <span className="portfolio-timeline-company">Digitera.Interactive</span>
+              <span className="portfolio-timeline-when">Feb – Jun 2022</span>
+              <span className="portfolio-timeline-desc">Co-op · Remote</span>
             </li>
           </ul>
         </section>
 
         <section className="portfolio-widget" aria-label="Education">
           <h3 className="portfolio-widget-label">Education</h3>
-          <p className="portfolio-widget-headline">B.S. Computer Science</p>
-          <p className="portfolio-widget-sub">Sample University · 2022 – 2026</p>
+          <p className="portfolio-widget-headline">Bachelor of Computer Science</p>
+          <p className="portfolio-widget-sub">Queen&rsquo;s University · 2023 – 2028</p>
           <p className="portfolio-widget-sub">
-            Coursework: graphics, distributed systems, human-computer interaction
+            Minor in Statistics · Specialization in Artificial Intelligence
           </p>
+          <p className="portfolio-widget-sub">
+            Coursework: Algorithms, Artificial Intelligence, Linear Algebra, Data Structures, Calculus, Statistics
+          </p>
+        </section>
+
+        <section className="portfolio-widget" aria-label="Extracurricular experience">
+          <h3 className="portfolio-widget-label">Extracurricular experience</h3>
+          <ul className="portfolio-timeline">
+            <li>
+              <strong>Director of Developers</strong>
+              <span className="portfolio-timeline-company">Queen&rsquo;s Technology &amp; Media Association (QTMA)</span>
+              <span className="portfolio-timeline-when">Mar 2024 – Present</span>
+              <span className="portfolio-timeline-desc">Prev. Co-Chair (2025–2026) · Prev. Developer, Team Nucleus (2024–2025)</span>
+            </li>
+            <li>
+              <strong>Member</strong>
+              <span className="portfolio-timeline-company">Rewriting the Code</span>
+              <span className="portfolio-timeline-when">Jul 2024 – Present</span>
+            </li>
+            <li>
+              <strong>Technical Consultant</strong>
+              <span className="portfolio-timeline-company">Queen&rsquo;s Startup Consulting (QSC)</span>
+              <span className="portfolio-timeline-when">Mar 2024 – Mar 2025</span>
+            </li>
+            <li>
+              <strong>Artificial Intelligence Engineer</strong>
+              <span className="portfolio-timeline-company">QMIND</span>
+              <span className="portfolio-timeline-when">Oct 2023 – Mar 2024</span>
+              <span className="portfolio-timeline-desc">Collaborated with a Fortune 500 company to build a prototype secure AI marketing email tool</span>
+            </li>
+            <li>
+              <strong>Orientation Leader</strong>
+              <span className="portfolio-timeline-company">Queen&rsquo;s University</span>
+              <span className="portfolio-timeline-when">Aug 2024</span>
+            </li>
+          </ul>
         </section>
 
         <section className="portfolio-widget" aria-label="Extracurriculars">
